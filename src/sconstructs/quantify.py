@@ -14,15 +14,16 @@ except NameError as ne:
 
 	Help(vars.GenerateHelpText(env))
 
-SRC_DIR = os.path.join(env['ENV']['MIRANDMORE_HOME'],'scons','prj')
+#SRC_DIR = os.path.join(env['ENV']['MIRANDMORE_HOME'],'scons','prj')
+SRC_DIR = env['SCONSCRIPT_HOME']
 
-mirandmore_align_to_hairpins = 'mirandmore_align_to_hairpins'
-mirandmore_serialize_alignments = 'mirandmore_serialize_alignments'
-mirandmore_do_exact_blob = 'mirandmore_do_exact_blob'
-mirandmore_do_cooked_blob = 'mirandmore_do_cooked_blob'
-mirandmore_do_tables = 'mirandmore_do_tables'
-mirandmore_extract_seq_of_novel_rnas = 'mirandmore_extract_seq_of_novel_rnas'
-mirandmore_spit_unfiltered_variants = 'mirandmore_spit_unfiltered_variants'
+mirandmore_align_to_hairpins    = 'align_to_hairpins.py'
+mirandmore_serialize_alignments = 'serialize_alignments.py'
+mirandmore_do_exact_blob        = 'do_exact_blob.py'
+mirandmore_do_cooked_blob       = 'do_cooked_blob.py'
+mirandmore_do_tables            = 'do_tables.py'
+mirandmore_extract_seq_of_novel_rnas = 'extract_seq_of_novel_rnas.py'
+mirandmore_spit_unfiltered_variants  = 'spit_unfiltered_variants.py'
 
 results = []
 results_dict = {}

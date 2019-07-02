@@ -24,7 +24,8 @@ env_summarize_depth = env.Clone()
 trim_results = [results[s]['trimmed'] for s in samples.keys()]
 env_summarize_depth['TRIMMING_REPORT_FILES'] = get_matching_nodes(trim_results, ".*_trimming_report\.txt")
 
-trimming_reports = SConscript(os.path.join(read_quality_stats_dir, 'mirandmore_summarize_depth'),
+trimming_reports = SConscript(os.path.join(read_quality_stats_dir,
+                                           'summarize_depth.py'),
                               src_dir = env['SCONSCRIPT_HOME'],
                               variant_dir = read_quality_stats_dir, 
                               duplicate = 0,
@@ -47,7 +48,8 @@ env_read_quality_stats['SAMPLES'] = samples.keys()
 read_quality_stats_nodes = [results[n]['quality'] for n in results.keys()]
 env_read_quality_stats['FASTQC_HTMLS'] = get_matching_nodes(read_quality_stats_nodes, '.*_fastqc\.html')
 
-read_quality_stats = SConscript(os.path.join(read_quality_stats_dir, 'mirandmore_quality_collect'),
+read_quality_stats = SConscript(os.path.join(read_quality_stats_dir,
+                                             'read_quality_collect.py'),
                                 src_dir = env['SCONSCRIPT_HOME'],
                                 variant_dir = read_quality_stats_dir, 
                                 duplicate = 0,
@@ -83,28 +85,29 @@ for sample in results.keys():
 
 non_mirna_align =  'c(' + ','.join(non_mirna_align_list) + ')' 
 
-## generate HTML result report ##
-#report_summary_cmd = '''Rscript -e 'results.dir <- dirname("$TARGET.abspath"); '''\
-report_summary_cmd = '''echo 'results.dir <- dirname("${TARGETS[1].abspath}"); '''\
-		'''meta.file <- "${SOURCES[0].abspath}"; '''\
-		'''trimming.file <- "${SOURCES[1].abspath}"; '''\
-		'''filtering.file <- "${SOURCES[2].abspath}"; '''\
-        '''pre.align.files <- ''' + mirna_pre_align + '''; '''\
-        '''seqtag.files <- ''' + mirna_seqtag_discarded + '''; '''\
-        '''multi.genmap.files <- ''' + mirna_multi_gen_map_filter + '''; '''\
-        '''pre.ass.iss.files <- ''' + mirna_pre_ass_iss + '''; '''\
-        '''non.mirna.align.files <- ''' + non_mirna_align + '''; '''\
-		'''rmarkdown::render(input = "$MIRANDMORE_BIN/processing_report.Rmd",'''\
-		'''output_file = "${TARGETS[1].abspath}", '''\
-		'''intermediates_dir = dirname("${TARGETS[1].abspath}") )' > ${TARGETS[0]}'''
-
-report_summary = env.Command(['processing_report_cmd.R',
-                              'processing_report.html'], 
-            			     [env['META'], trimming_reports[0], collect_filter_stats,
-                              [quantify_results[s]['HAIRPIN_ALIGNMENTS'][1] for s in quantify_results.keys()], 
-                              [quantify_results[s]['TABLES'][3] for s in quantify_results.keys()],
-                              [results[s]['non_mirna']['ALIGNMENTS'][1] for s in results.keys()]], 
-            			     [report_summary_cmd + ' && Rscript ${TARGETS[0]}'])
-
-Return('trimming_reports collect_filter_stats read_quality_stats report_summary')
+### generate HTML result report ##
+##report_summary_cmd = '''Rscript -e 'results.dir <- dirname("$TARGET.abspath"); '''\
+#report_summary_cmd = '''echo 'results.dir <- dirname("${TARGETS[1].abspath}"); '''\
+#		'''meta.file <- "${SOURCES[0].abspath}"; '''\
+#		'''trimming.file <- "${SOURCES[1].abspath}"; '''\
+#		'''filtering.file <- "${SOURCES[2].abspath}"; '''\
+#        '''pre.align.files <- ''' + mirna_pre_align + '''; '''\
+#        '''seqtag.files <- ''' + mirna_seqtag_discarded + '''; '''\
+#        '''multi.genmap.files <- ''' + mirna_multi_gen_map_filter + '''; '''\
+#        '''pre.ass.iss.files <- ''' + mirna_pre_ass_iss + '''; '''\
+#        '''non.mirna.align.files <- ''' + non_mirna_align + '''; '''\
+#		'''rmarkdown::render(input = "$MIRANDMORE_BIN/processing_report.Rmd",'''\
+#		'''output_file = "${TARGETS[1].abspath}", '''\
+#		'''intermediates_dir = dirname("${TARGETS[1].abspath}") )' > ${TARGETS[0]}'''
+#
+#report_summary = env.Command(['processing_report_cmd.R',
+#                              'processing_report.html'], 
+#            			     [env['META'], trimming_reports[0], collect_filter_stats,
+#                              [quantify_results[s]['HAIRPIN_ALIGNMENTS'][1] for s in quantify_results.keys()], 
+#                              [quantify_results[s]['TABLES'][3] for s in quantify_results.keys()],
+#                              [results[s]['non_mirna']['ALIGNMENTS'][1] for s in results.keys()]], 
+#            			     [report_summary_cmd + ' && Rscript ${TARGETS[0]}'])
+#
+#Return('trimming_reports collect_filter_stats read_quality_stats report_summary')
+Return('trimming_reports collect_filter_stats read_quality_stats')
 

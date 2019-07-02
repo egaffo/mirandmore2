@@ -49,7 +49,7 @@ if env_bowtie['BOWTIE_INDEX'].endswith('.1.ebwt'):
 env_bowtie.Replace(READS = [File(f).abspath for f in Flatten(env['READS'])])
 
 genome_alignments = SConscript(os.path.join(genome_alignments_dir,
-                                            'mirandmore_bowtie.scons'),
+                                            'bowtie.py'),
                     variant_dir = genome_alignments_dir,
                     src_dir = env['SCONSCRIPT_HOME'],
                     duplicate = 0,

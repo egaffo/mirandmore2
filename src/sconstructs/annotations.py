@@ -35,11 +35,12 @@ except NameError:
     GENOME_FASTA            = File(env['GENOME_FASTA'])
     SPECIES                 = env['SPECIES']
 
-SRC_DIR = os.path.join(env['ENV']['MIRANDMORE_HOME'],'scons','prj')
+#SRC_DIR = os.path.join(env['ENV']['MIRANDMORE_HOME'],'scons','prj')
+SRC_DIR = env['SCONSCRIPT_HOME']
 
 ## SConscripts
-mirandmore_process_annotation = 'mirandmore_process_annotation'
-mirandmore_extend_hairpins = 'mirandmore_extend_hairpins'
+mirandmore_process_annotation = 'process_annotation.py'
+mirandmore_extend_hairpins = 'extend_hairpins.py'
 
 ## output directories
 annotation_dir = 'annotation'

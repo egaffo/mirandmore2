@@ -79,7 +79,8 @@ env['SCONSCRIPT_HOME'] = SCONSCRIPT_HOME
 env['MIRANDMORE_BIN'] = os.path.join(env['ENV']['MIRANDMORE_HOME'],'bin')
 
 env.Replace(GENOME =  File(env['GENOME']).abspath)
-env.Replace(GENE_ANNOTATION = File(env['GENE_ANNOTATION']).abspath)
+if env['GENE_ANNOTATION'] != '':
+    env.Replace(GENE_ANNOTATION = File(env['GENE_ANNOTATION']).abspath)
 env.Replace(META = File(env['META']).abspath)
 
 if env['NOADAPTER'] == 'True':
@@ -421,9 +422,14 @@ for sample in sorted(samples.keys()):
 sample_file_str = []
 gene_count_files = []
 for sample in samples.keys():
-    count_file = results[sample]['non_mirna']['GENE_COUNTS'][0]
-    sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
-    gene_count_files.append(count_file)
+    count_file = results[sample]['non_mirna']['GENE_COUNTS']
+    if count_file:
+        count_file = count_file[0]
+        sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
+    else:
+        sample_file_str.append("'" + sample + "' = 'None'")
+
+    gene_count_files.append(count_file)       
 
 gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
 
