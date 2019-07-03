@@ -20,4 +20,8 @@ tar -xf $TOOL_DIR/scons-local-2.5.1.tar.gz -C $TOOL_DIR/scons ;
 
 ln -s $TOOL_DIR/scons/scons.py $MIRANDMORE_HOME/bin/scons ; }
 
-scons -f $MIRANDMORE_HOME/src/sconstucts/install.py $1
+cd $MIRANDMORE_HOME/bin
+ln -s ../src/utils/* .
+cd -
+
+scons -f $MIRANDMORE_HOME/src/sconstructs/install.py $1
