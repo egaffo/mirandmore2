@@ -498,7 +498,7 @@ summary_tables = SConscript(os.path.join(results_dir, 'summarize_tables.py'),
                             duplicate = 0,
                             exports = '''env_summarize_tables ''')
 
-env['NORMALIZED_DATA'] = summary_tables[1]
+#env['NORMALIZED_DATA'] = summary_tables[1]
 
 ## COLLECT NOVEL PREDICTIONS
 env_new_stuff = env.Clone()

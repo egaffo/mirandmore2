@@ -26,7 +26,8 @@ if env['NEW_PREMIRS_MIRS_GFF'] and not env['NEW_PREMIRS_MIRS_GFF'] == '':
 else:
     cmdLine = '''touch ${TARGETS[0]} && touch ${TARGETS[1]}'''
 
-get_new_srna_bed = env.Command(["new-mir-table-without-seqs.txt", "new_mir_squished_coords.bed"], 
+get_new_srna_bed = env.Command(["new-mir-table-without-seqs.txt", 
+                                "new_mir_squished_coords.bed"], 
                                env['MIR_TABLES'], 
                                cmdLine)
 
@@ -53,23 +54,24 @@ fastaToCsv = env.Command("new-srna-seqs.csv",
 			 new_srna_fasta, 
 			 fastaToCsvCmdLine)
 
-## compute mean expression relative to condition
-meansPerCondtionCmdLine = "means-per-condition.R -m ${SOURCES[1]} --data ${SOURCES[0]} --output ${TARGET}"
-means = env.Command('means_per_condition.txt',
-		    [env['NORMALIZED_DATA'], env['META']], 
-		    meansPerCondtionCmdLine)
+### compute mean expression relative to condition
+#meansPerCondtionCmdLine = "means-per-condition.R -m ${SOURCES[1]} --data ${SOURCES[0]} --output ${TARGET}"
+#means = env.Command('means_per_condition.txt',
+#		    [env['NORMALIZED_DATA'], env['META']], 
+#		    meansPerCondtionCmdLine)
 
-## write new stuff tables
-sources_for_new_srna_table = [means[0], #means_per_condition.txt
-                              fastaToCsv[0], #new-srna-seqs.csv
-                              get_new_srna_bed[0]] #new-mir-table-without-seqs.txt
-
-targets_for_new_srna_table = ["new-srna-table-with-seq.txt", 
-                              "new-mir-table-with-seq.txt", 
-                              "mor-table-with-seq.txt"]
-newSrnaCmdLine = "create-new-srna-table.R -w ${TARGETS[0].dir}"
-new_srna_tables = env.Command(targets_for_new_srna_table, 
-                              sources_for_new_srna_table, 
-                              newSrnaCmdLine)
-
-Return('get_new_srna_bed new_srna_fasta fastaToCsv means new_srna_tables')
+### write new stuff tables
+#sources_for_new_srna_table = [means[0], #means_per_condition.txt
+#                              fastaToCsv[0], #new-srna-seqs.csv
+#                              get_new_srna_bed[0]] #new-mir-table-without-seqs.txt
+#
+#targets_for_new_srna_table = ["new-srna-table-with-seq.txt", 
+#                              "new-mir-table-with-seq.txt", 
+#                              "mor-table-with-seq.txt"]
+#newSrnaCmdLine = "create-new-srna-table.R -w ${TARGETS[0].dir}"
+#new_srna_tables = env.Command(targets_for_new_srna_table, 
+#                              sources_for_new_srna_table, 
+#                              newSrnaCmdLine)
+#
+#Return('get_new_srna_bed new_srna_fasta fastaToCsv means new_srna_tables')
+Return('get_new_srna_bed new_srna_fasta fastaToCsv')

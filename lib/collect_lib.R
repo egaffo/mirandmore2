@@ -1,4 +1,4 @@
-require(DESeq)
+#require(DESeq2)
 require(plyr)
 
 a <- function(name,value) {
@@ -139,29 +139,29 @@ prepare.variants <- function(unfiltered_variants_filepaths) {
 }  
 
 
-to.cds <- function(data,conditions) {
-  count.mat <- as.matrix(data)
-  cds <- newCountDataSet(count.mat,conditions)
-  cds <- estimateSizeFactors(cds)
-  cds
-}
-
-count.data.to.cds  <- function(count.data, conditions, last) {
-    i <- match(last, colnames(count.data))
-    meta.data.names <- colnames(count.data)[1:i]
-    meta.data <- as.data.frame(count.data[, 1:i], stringsAsFactors = F)
-    colnames(meta.data) <- meta.data.names
-    data <- count.data[, -c(1:i), drop = FALSE]
-    if (last == "name")
-        rownames(data) <- count.data[, "name"]
-    cds <- to.cds(data, conditions)
-    list(cds = cds, meta.data = meta.data)
-}
-
-normalize.count.data <- function(obj) {
-    normalized.data <- counts(obj$cds,normalized=T)
-    cbind(obj$meta.data,as.data.frame(normalized.data,stringsAsFactors=F))
-}
+#to.cds <- function(data,conditions) {
+#  count.mat <- as.matrix(data)
+#  cds <- newCountDataSet(count.mat,conditions)
+#  cds <- estimateSizeFactors(cds)
+#  cds
+#}
+#
+#count.data.to.cds  <- function(count.data, conditions, last) {
+#    i <- match(last, colnames(count.data))
+#    meta.data.names <- colnames(count.data)[1:i]
+#    meta.data <- as.data.frame(count.data[, 1:i], stringsAsFactors = F)
+#    colnames(meta.data) <- meta.data.names
+#    data <- count.data[, -c(1:i), drop = FALSE]
+#    if (last == "name")
+#        rownames(data) <- count.data[, "name"]
+#    cds <- to.cds(data, conditions)
+#    list(cds = cds, meta.data = meta.data)
+#}
+#
+#normalize.count.data <- function(obj) {
+#    normalized.data <- counts(obj$cds,normalized=T)
+#    cbind(obj$meta.data,as.data.frame(normalized.data,stringsAsFactors=F))
+#}
 
 filter.out.mir.tablef <- function(df) {
   return (df[,c("name","expression")])

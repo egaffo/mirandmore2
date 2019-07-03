@@ -16,8 +16,8 @@ except NameError as ne:
     env['MIR_TABLES'] = env['MIR_TABLES'].split(',')
     env['UNFILTERED_VARIANT_TABLES'] = env['UNFILTERED_VARIANT_TABLES'].split(',')
 
-targets = ["raw_data.txt", "normalized_data.txt", 
-           "raw_variants.txt", "normalized_variants.txt"]
+targets = ["raw_data.txt", #"normalized_data.txt", 
+           "raw_variants.txt"]#, "normalized_variants.txt"]
            
 sources = [env['MIR_TABLES'], 
 	   env['UNFILTERED_VARIANT_TABLES']]
