@@ -426,10 +426,10 @@ for sample in samples.keys():
     if count_file:
         count_file = count_file[0]
         sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
+        gene_count_files.append(count_file)       
     else:
         sample_file_str.append("'" + sample + "' = 'None'")
 
-    gene_count_files.append(count_file)       
 
 gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
 
