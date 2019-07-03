@@ -430,20 +430,20 @@ for sample in samples.keys():
     else:
         sample_file_str.append("'" + sample + "' = 'None'")
 
-
-gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
-
-collect_gene_counts_cmd = '''Rscript -e " ''' + gene_count_vector +\
-        '''; merged.gtf.counts.file <- '${TARGETS[0]}'; '''\
-        '''count.matrix.file <- '${TARGETS[1]}'; '''\
-        '''source(file.path('$MIRANDMORE_BIN', 'collect_gene_counts.R')) " '''
-
-collect_gene_counts_targets = [os.path.join(results_dir, f) for f in 
-                                  ['non_mirna_gene_counts.gtf.csv',
-                                   'non_mirna_gene_counts.csv']]
-collect_gene_counts = env.Command(collect_gene_counts_targets,
-                                     gene_count_files,
-                                     collect_gene_counts_cmd)
+if len(gene_count_files) > 0:
+    gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
+    
+    collect_gene_counts_cmd = '''Rscript -e " ''' + gene_count_vector +\
+            '''; merged.gtf.counts.file <- '${TARGETS[0]}'; '''\
+            '''count.matrix.file <- '${TARGETS[1]}'; '''\
+            '''source(file.path('$MIRANDMORE_BIN', 'collect_gene_counts.R')) " '''
+    
+    collect_gene_counts_targets = [os.path.join(results_dir, f) for f in 
+                                      ['non_mirna_gene_counts.gtf.csv',
+                                       'non_mirna_gene_counts.csv']]
+    collect_gene_counts = env.Command(collect_gene_counts_targets,
+                                         gene_count_files,
+                                         collect_gene_counts_cmd)
 
 
 #read_quality_stats_dir = 'read_quality_stats'
