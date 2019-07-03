@@ -147,10 +147,16 @@ for l in md2_xtr:
     env.Command(os.path.join(BIN, l.name), l, SymLink)
 
 ### R PACKAGES
-#env['ENV']['R_LIBS'] =  os.path.join(Dir('.').abspath, "R_libs")
-#R_libs_targets = [os.path.join('R_libs', 'DESeq2', 'R', 'DESeq2'),
-#                  os.path.join('R_libs', 'data.table', 'R','data.table')]
-#R_libs = env.Command(R_libs_targets, [], 'install_R_libs.R')
+# getopt, plyr #data.table
+env['ENV']['R_LIBS'] = os.path.join(TOOLS, "R_libs")
+env['ENV']['R_INSTALL_STAGED'] = 'false' ## this is a workaround to prevent
+                                    ## installation failure due to Scons 
+                                    ## generating empty files and directory
+                                    ## structure of targets
+R_libs_targets = [os.path.join(TOOLS, 'R_libs', 'plyr', 'R', 'plyr'),
+                  os.path.join(TOOLS, 'R_libs', 'getopt', 'R', 'getopt')]
+R_libs = env.Command(R_libs_targets, [], 'install_R_libs.R')
+
 
 # BEDTOOLS
 BEDTOOLS_tar = 'bedtools-2.27.0.tar.gz'
@@ -177,5 +183,6 @@ SAMTOOLS = env.Command(SAMTOOLS_target, [], ['wget -O $TARGET  ' + SAMTOOLS_link
                                              'make prefix=' + SAMTOOLS_dir + ' install',
                                              'cd ' + Dir('.').abspath])
 env.Command(os.path.join(BIN, "${SOURCE.file}"), SAMTOOLS[1], SymLink)
+
 
 

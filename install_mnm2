@@ -3,9 +3,9 @@
 export MIRANDMORE_HOME=$(dirname $(readlink -f $0))
 export PYTHONPATH=$PYTHONPATH:$MIRANDMORE_HOME/lib
 export PATH=$MIRANDMORE_HOME/bin:$PATH
-export R_LIBS="$MIRANDMORE_HOME/packs/R_libs"
 export SCONS_HORRIBLE_REGRESSION_TEST_HACK=1
 export TOOL_DIR=$MIRANDMORE_HOME/tools
+export R_LIBS=$TOOLS_DIR/R_libs
 
 mkdir -p $TOOL_DIR ;
 
