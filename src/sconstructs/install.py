@@ -130,15 +130,16 @@ FASTQC = env.Command(FASTQC_target, [], ['wget -q -O $TARGET  ' + FASTQC_link,
 env.Command(os.path.join(BIN, "${SOURCE.file}"), FASTQC[1], SymLink)
 
 ## MIRDEEP2
-md2_zip = "v0.1.2.zip"
+md2_zip = "v0.1.2.zip" #'v0.0.8.zip'
 md2_url = 'https://github.com/rajewsky-lab/mirdeep2/archive/' + md2_zip
+md2_dir = 'mirdeep2-0.1.2' #'mirdeep2-0.0.8'
 md2_dnwld = env.Command(os.path.join(TOOLS, md2_zip), 
                         Uri(md2_url), 
                         "wget -q ${SOURCE} -O ${TARGET}")
-md2_xtr = env.Command([os.path.join(TOOLS, "mirdeep2-0.1.2/src/convert_bowtie_output.pl"),
-                       os.path.join(TOOLS, "mirdeep2-0.1.2/src/excise_precursors_iterative_final.pl"),
-                       os.path.join(TOOLS, "mirdeep2-0.1.2/src/parse_mappings.pl"),
-                       os.path.join(TOOLS, "mirdeep2-0.1.2/src/miRDeep2_core_algorithm.pl")], 
+md2_xtr = env.Command([os.path.join(TOOLS, md2_dir, "src", "convert_bowtie_output.pl"),
+                       os.path.join(TOOLS, md2_dir, "src", "excise_precursors_iterative_final.pl"),
+                       os.path.join(TOOLS, md2_dir, "src", "parse_mappings.pl"),
+                       os.path.join(TOOLS, md2_dir, "src", "miRDeep2_core_algorithm.pl")], 
                       md2_dnwld, 
                       "unzip ${SOURCE} -d `dirname ${SOURCE}`")
 
