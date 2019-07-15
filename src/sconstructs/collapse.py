@@ -35,6 +35,7 @@ except NameError:
 target = env['SAMPLE'] + "_uniques.fa"
 collapsed = env.Command(target,
                         env['READS2COLLAPSE'],
-                        "fastq_to_uniques_fasta.py -i ${SOURCE} -b ${SAMPLE[-3:]} -o ${TARGET}")
+                        """fastq_to_uniques_fasta.py -i ${SOURCE} """\
+                        """-b '${SAMPLE[-3:].replace("-", "_")}' -o ${TARGET}""")
 Return('collapsed')
 
