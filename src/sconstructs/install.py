@@ -19,16 +19,18 @@ Decider('MD5-timestamp')
 
 TOOLS = os.path.join(env['ENV']['MIRANDMORE_HOME'], 'tools')
 BIN = os.path.join(env['ENV']['MIRANDMORE_HOME'],'bin')
-PYTHON_LIB = os.path.join(TOOLS, 'lib', 'python3.5','site-packages')
+PYTHON_LIB = os.path.join(env['ENV']['MIRANDMORE_HOME'], 
+                          'lib', 'python3.5','site-packages')
 
-env.PrependENVPath('PYTHONUSERBASE', TOOLS)
+#env.PrependENVPath('PYTHONUSERBASE', TOOLS)
+env.PrependENVPath('PYTHONUSERBASE', env['ENV']['MIRANDMORE_HOME'])
 env.PrependENVPath('PYTHONPATH', PYTHON_LIB)
 
 ## PIP
 pip_file = 'get-pip.py'
 pip_url = 'https://bootstrap.pypa.io/' + pip_file
 pip_targets = [os.path.join(TOOLS, pip_file),
-               os.path.join(TOOLS, 'bin', 'pip')]
+               os.path.join(BIN, 'pip')]
 pip_cmd = ' && '.join(['wget -O ${TARGETS[0]} ' + pip_url, 
                        'python ${TARGETS[0]} --user'])
 pip = env.Command(pip_targets, 
@@ -187,4 +189,8 @@ SAMTOOLS = env.Command(SAMTOOLS_target, [], ['wget -O $TARGET  ' + SAMTOOLS_link
 env.Command(os.path.join(BIN, "${SOURCE.file}"), SAMTOOLS[1], SymLink)
 
 
-
+# CUTADAPT
+cutadapt_dir = os.path.join(PYTHON_LIB, 'cutadapt')
+cutadapt_target = [os.path.join(BIN, 'cutadapt')]
+cutadapt = env.Command(cutadapt_target, [pip],
+		       ['pip install --ignore-installed --user cutadapt'])
