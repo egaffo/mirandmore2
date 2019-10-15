@@ -1,75 +1,136 @@
 #!/usr/bin/env python
 
 """
-filtering is hardcoded but the pipeline in part or in toto
-can be built programmatically using reduce.
-
-For example:
-chain = lambda b,a: b.__pipe__(a) if hasattr(b, '__pipe__') else b(a)
-
-chain is a function version of >> stream operator
-
-range(10) >> reduce(chain, [stream.filter(lambda x: x%2 ==0), stream.filter(lambda x: x > 5),stream.filter(lambda x : x <= 8 )]) >> list
-[0, 2, 4, 6, 8]
+Filter FASTQ reads according to quality and length
 """
 
 from __future__ import print_function
-import argparse
-import stream
-from  stream import filter
-from deepfilter import *
-import gzip
+import argparse, gzip, HTSeq, sys
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-i','--input',dest='input',required=True)
-    parser.add_argument('-o','--output',dest='output', required = False, 
+
+    parser.add_argument('-i', '--input',
+                        dest = 'fastq_file',
+                        required = True)
+    
+    parser.add_argument('-o', '--output', 
+                        dest = 'output', 
+                        required = False, 
                         default = "-")
-    parser.add_argument('-l','--max-length',dest='max_length',default=26, type=int)
-    parser.add_argument('-L','--long-read-file',dest='long_read_file',
-                        default="", type=str)
-    parser.add_argument('-q','--mean-quality',dest='mean_quality',default=30, type=int)
-    parser.add_argument('-e','--quality-encoding',dest='quality_encoding',default="phred")
-    parser.add_argument('-r','--report-file',dest='report_file',required=False,
+    
+    parser.add_argument('-l', '--max-length',
+                        dest = 'max_length',
+                        default = 26, 
+                        type = int)
+    
+    parser.add_argument('-L', '--long-read-file',
+                        dest = 'long_read_file',
+                        default = "", 
+                        type = str)
+    
+    parser.add_argument('-q', '--mean-quality',
+                        dest = 'mean_quality',
+                        default = 30, 
+                        type = int)
+    
+    parser.add_argument('-e', '--quality-encoding',
+                        dest = 'quality_encoding',
+                        default = "phred")
+    
+    parser.add_argument('-r', '--report-file',
+                        dest = 'report_file',
+                        required = False,
                         default = 'filter_report.txt')
+    
+    parser.add_argument('-p', '--min_base_qual',
+                        dest = 'min_base_qual',
+                        default = 20,
+                        required = False,
+                        type = int)
 
     args = parser.parse_args()
 
-    total = Counter()
-    passed = Counter()
+    ## handle compressed files 
+    if args.fastq_file.endswith('.gz'):
+        f = gzip.open(args.fastq_file, 'rb')
+
+    elif args.fastq_file == '-':
+        f = sys.stdin
+    
+    else:
+        f = open(args.fastq_file, 'r')
+
+    fastq_file = HTSeq.FastqReader(f, args.quality_encoding)
+
+    if args.output == '-':
+        outfile = sys.stdout
+    
+    elif args.output.endswith('.gz'):
+        outfile = gzip.open(args.output, 'wb')
+    else:
+        outfile = open(args.output, 'w')
 
     if not args.long_read_file == '':
+        
         ## get file handler to save discarded reads from length filter
         if args.long_read_file.lower().endswith(".gz"):
             long_read_file = gzip.open(args.long_read_file, 'wb')
+        
         else:
             long_read_file = open(args.long_read_file, 'w')
+
+    low_base_qual_read_count = 0
+    low_mean_base_qual_read  = 0
+    long_read_count = 0
+    processed_read_count = 0
+
+    for read in fastq_file:
+        processed_read_count += 1
+        read_len = len(read.qual)
+        read_mean_qual = sum(read.qual)/float(read_len)
+        read_lowqual_bases = sum(read.qual < args.min_base_qual)
         
-        lenfilter      = MaxLenFilter(args.max_length, long_read_file)
-    else:
-        lenfilter      = MaxLenFilter(args.max_length)
+        if read_lowqual_bases < 2:
+            if read_mean_qual >= args.mean_quality:
+                if read_len <= args.max_length:
+                    read.write_to_fastq_file(outfile)
 
-    meanqualfilter = MeanQualityFilter(args.mean_quality)
-    posfilter      = MorePositionsLessThan(2,20)
-    
-    writer = FastqWriter(args.output)
+                else:
+                    long_read_count += 1
+                    if not args.long_read_file == '':
+                        read.write_to_fastq_file(long_read_file)
 
-    dsopen(args.input,args.quality_encoding) >> total >> filter(meanqualfilter) >> filter(posfilter) >> filter(lenfilter) >> passed  >> writer
-    
-    filters = [meanqualfilter, posfilter, lenfilter]
-    
+            else:
+                low_mean_base_qual_read += 1
+
+        else:
+            low_base_qual_read_count += 1
+
     if not args.long_read_file == '':
         long_read_file.close()
+    
+    outfile.close()
 
     with open(args.report_file, "w") as report_file:
-        for filter_ in filters:
-            print("%d reads discarded because %s" % (filter_.discarded,filter_.message), 
-                  file = report_file)
-    
-        print("%d passed" % passed.n, file = report_file)
-        print("%d total"  % total.n, file = report_file)
-        print("%2.2f%% keeped" % ( (passed.n/float(total.n))*100 ), 
-                file = report_file)
+        print('''{} processed reads'''.format(processed_read_count), 
+              file = report_file)
+
+        print('''{} reads discarded because > '''\
+              '''{} bases had quality < '''\
+              '''{}'''.format(low_base_qual_read_count,
+                              2, 
+                              args.min_base_qual), 
+              file = report_file)
+
+        print('''{} reads discarded because mean quality '''\
+              '''was < {}'''.format(low_mean_base_qual_read, 
+                                    args.mean_quality), 
+              file = report_file)
+
+        print('''{} reads were > {} nt long'''.format(long_read_count, 
+                                                 args.max_length), 
+              file = report_file)
 
 
