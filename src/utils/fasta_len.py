@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import sys, gzip
 from Bio import SeqIO
 
@@ -15,6 +16,6 @@ for rec in SeqIO.parse(FastaFile, 'fasta'):
     name = rec.id
     seq = rec.seq
     seqLen = len(rec)
-    print name + '\t' + str(seqLen)
+    print(name + '\t' + str(seqLen))
 
 FastaFile.close()
