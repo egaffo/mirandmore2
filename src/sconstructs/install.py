@@ -35,6 +35,8 @@ pip = env.Command(pip_targets,
                   [], 
                   pip_cmd)
 
+## use pip just installed and not the system one
+env.PrependENVPath('PATH', os.path.join(TOOLS, 'bin'))
 # BIOPYTHON
 BIOPYTHON_dir = os.path.join(PYTHON_LIB, 'Bio')
 BIOPYTHON_target = [os.path.join(BIOPYTHON_dir, 'SeqIO', 'FastaIO.py')]
