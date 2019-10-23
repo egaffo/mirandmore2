@@ -666,14 +666,14 @@ class PreSummary:
                 setattr(self,name,None)
                 break
 
-    def as_dict(self):
-        _dict = {}
-        for attr in ("five_prime_mir", "five_prime_mor", "loop",
-                     "three_prime_mir", "three_prime_mor"):
-            obj = getattr(self,attr) 
-            if obj  is not None: 
-                _dict[obj.name] = obj
-        return _dict
+    #def as_dict(self):
+    #    _dict = {}
+    #    for attr in ("five_prime_mir", "five_prime_mor", "loop",
+    #                 "three_prime_mir", "three_prime_mor"):
+    #        obj = getattr(self,attr) 
+    #        if obj  is not None: 
+    #            _dict[obj.name] = obj
+    #    return _dict
 
     def populate(self, rnas):
         for rna_ in rnas:
@@ -683,4 +683,4 @@ class PreSummary:
             self.assign_from_stack(rna_)
         
         self.clean()
-        self.data = self.as_dict()
+        #self.data = self.as_dict()
