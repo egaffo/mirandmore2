@@ -71,7 +71,7 @@ for sample,qresults in quantify_results.items():
     mirna_multi_gen_map_filter_list.append(sample + '="' + \
                                            qresults['HAIRPIN_ALIGNMENTS_BLOB'][3].abspath + '"')
     ## PRECURSOR ASSIGNMENT ISSUES
-    mirna_pre_ass_iss_list.append(sample + '="' + qresults['TABLES'][3].abspath + '"')
+    mirna_pre_ass_iss_list.append(sample + '="' + qresults['TABLES'][2].abspath + '"')
 
 mirna_pre_align = 'c(' + ','.join(mirna_pre_align_list) + ')'
 mirna_seqtag_discarded = 'c(' + ','.join(mirna_seqtag_discarded_list) + ')'

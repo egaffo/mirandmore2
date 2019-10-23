@@ -156,7 +156,7 @@ Clean('.', sequences_dir)
 
 ##############################
 ## Include moRNAs and new sister miRNAs in unfiltered variants:
-new_matures_table_source = [tables[2], env['MATURE_TABLE']]
+new_matures_table_source = [tables[1], env['MATURE_TABLE']]
 new_matures_table_target = os.path.join(table_dir, 'mature-table-with-new.txt')
 new_matures_table_cmd = 'pre_summary_to_mature_table.py -p ${SOURCES[0]} -m ${SOURCES[1]} -o ${TARGET}'
 new_matures_table = env.Command(new_matures_table_target, 

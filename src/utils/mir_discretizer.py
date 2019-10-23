@@ -91,7 +91,6 @@ class Processor:
         ## write the precursors_summary data in a python-friendly file format
         with open(self.base_name + "_pre_summary.blob", "w") as presummary_blob:
             pickle.dump(self.data, presummary_blob)
-            #presummary_blob.close() ## unnecessary when using 'with' statement
 
 #    def is_not_exact(self,name,entry):
 #        seq, start, end = entry[0]
@@ -132,21 +131,21 @@ class Processor:
         return l
 
 
-    def write_excel_table(self):
-        with open(self.base_name+"_mir_table_excel.txt","w") as f:
-            header = ["pre","mor-5p","mir-5p","loop","mir-3p","mor-3p","n_known_matures"]
-            f.write(";".join(header)+"\n")
-            for pre, presummary in self.data.items():
-                items=[presummary.stdName]
-                for attr in ["five_prime_mor", "five_prime_mir", "loop", 
-                             "three_prime_mir","three_prime_mor"]:
-                    obj = getattr(presummary, attr)
-                    if obj:
-                        items.append(str(obj.count))
-                    else:
-                        items.append("0")
-                items.append(str(presummary.n_matures))
-                f.write(";".join(items)+"\n")
+    #def write_excel_table(self):
+    #    with open(self.base_name+"_mir_table_excel.txt","w") as f:
+    #        header = ["pre","mor-5p","mir-5p","loop","mir-3p","mor-3p","n_known_matures"]
+    #        f.write(";".join(header)+"\n")
+    #        for pre, presummary in self.data.items():
+    #            items=[presummary.stdName]
+    #            for attr in ["five_prime_mor", "five_prime_mir", "loop", 
+    #                         "three_prime_mir","three_prime_mor"]:
+    #                obj = getattr(presummary, attr)
+    #                if obj:
+    #                    items.append(str(obj.count))
+    #                else:
+    #                    items.append("0")
+    #            items.append(str(presummary.n_matures))
+    #            f.write(";".join(items)+"\n")
                 
                 
     def write_normalized_table(self):
@@ -200,7 +199,7 @@ def main():
                           MIN_MORNA_LEN, SPECIES, NEW_RNA_OBJECT_THRESHOLD, 
                           SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD)
     processor.write_normalized_table()
-    processor.write_excel_table()
+    #processor.write_excel_table()
 
 
 if __name__ == '__main__':

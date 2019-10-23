@@ -33,7 +33,7 @@ except NameError as ne:
 OS_PATH_SEP = os.path.sep
 
 targets = [env['SAMPLE'] + "_mir_table.txt", 
-           env['SAMPLE'] + "_mir_table_excel.txt", 
+           #env['SAMPLE'] + "_mir_table_excel.txt", 
            #env['SAMPLE'] + "_pre_processed.blob", 
            env['SAMPLE'] + "_pre_summary.blob",
            env['SAMPLE'] + "_assign.log"]
