@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import pdb
 import sys
 import HTSeq
 from time import time, sleep
 from collections import defaultdict
 from itertools import groupby
-import cPickle as pickle
-
+#import cPickle as pickle
+import pickle
 
 
 
@@ -60,7 +61,7 @@ class Writer(object):
         while True:
             item = yield
             self.n += 1
-            print "writer %d: %d" % (self.wid,item)
+            print("writer {}: {}".format(self.wid,item))
         
 
     
@@ -73,7 +74,7 @@ class Tail(Transformer):
     def __call__(self):
         while True:
             item = ( yield )
-            print item
+            print(item)
     
 
 class Meter(object):
@@ -208,7 +209,7 @@ class MultipleHitsGenomicFilter(Filter):
         Filter.__init__(self)
         self.threshold = threshold
         self.discarded = []
-        with open(filename) as f:
+        with open(filename, 'rb') as f:
             self.genomic_hits = pickle.load(f)
         self.dist = defaultdict(int)
 

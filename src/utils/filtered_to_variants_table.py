@@ -14,7 +14,7 @@ def main():
 
     CATEGORIES = ["exact","shorter_or_longer","mismatch_1","mismatch_2"]
 
-    with open(args.input) as f:
+    with open(args.input, 'rb') as f:
         pre_result_set = pickle.load(f)
 
     with open(args.output,"w") as out:
@@ -30,7 +30,14 @@ def main():
                         sequence = seq[0]
                         start = str(seq[1])
                         end   = str(seq[2])
-                        line = [pre_name,mature_name,sequence,start,end,category,type_,str(count)]
+                        line = [str(pre_name), 
+                                str(mature_name),
+                                str(sequence),
+                                str(start),
+                                str(end),
+                                str(category),
+                                str(type_),
+                                str(count)]
                         out.write(";".join(line)+"\n")
                     #except:
                         #pdb.set_trace()

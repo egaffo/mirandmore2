@@ -6,7 +6,8 @@ import csv
 from collections import defaultdict
 from itertools import groupby
 from operator import itemgetter
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 import re
 from rna import MatureResultSet, PreResultSet, Mature, build_pre_to_mature_table#, MIRANDMORE_HOME
 #from config import ALLOWED_OVERHANG, ALLOWED_OVERHANG_MORNA, EXACT, SHORTER_OR_LONGER, MIS_1, MIS_2, FIVE_PRIME, THREE_PRIME, MIN_COUNT
@@ -25,9 +26,9 @@ def overlap(alnmt, mature):
 
 def extract(results, category):
     try:
-        idx = map(itemgetter(0),results).index(category)
+        idx = list(map(itemgetter(0),results)).index(category)
     except ValueError:
-        idx = None
+        idx = -1
     return idx
 
 #def is_exact_morna(alnmt, mature):

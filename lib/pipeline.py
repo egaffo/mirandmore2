@@ -12,7 +12,9 @@ shutdown when the processing is complete and when a stage raises an
 exception.
 """
 from __future__ import with_statement # for Python 2.5
-from Queue import Queue
+from __future__ import print_function
+#from Queue import Queue
+from queue import Queue
 from threading import Thread, Lock
 import pdb
 
@@ -165,7 +167,8 @@ class Pipeline(object):
         """
         # "Prime" the coroutines.
         for coro in self.stages[1:]:
-            coro.next()
+            #coro.next()
+            next(coro)
    
         def run(stages): 
             for msg in stages[0]:
@@ -224,20 +227,20 @@ if __name__ == '__main__':
     
     def produce():
         for i in range(5):
-            print 'generating', i
+            print('generating', i)
             time.sleep(1)
             yield i
     def work():
         num = yield
         while True:
-            print 'processing', num
+            print('processing', num)
             time.sleep(2)
             num = yield num*2
     def consume():
         while True:
             num = yield
             time.sleep(1)
-            print 'received', num
+            print('received', num)
     
     ts_start = time.time()
     Pipeline([produce(), work(), consume()]).run_sequential()
@@ -245,5 +248,5 @@ if __name__ == '__main__':
     Pipeline([produce(), work(), consume()]).run_parallel()
     ts_end = time.time()
     
-    print 'Sequential time:', ts_middle - ts_start
-    print 'Parallel time:', ts_end - ts_middle
+    print('Sequential time:', ts_middle - ts_start)
+    print('Parallel time:', ts_end - ts_middle)

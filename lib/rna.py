@@ -2,7 +2,8 @@
 from collections import defaultdict
 import pdb
 import os
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 from Bio import pairwise2
 #import stream
 from functools import partial
@@ -219,7 +220,7 @@ class HairpinProxy(object):
     def __init__(self, HAIRPIN_EXTENDED_BLOB):
         #in_file = os.path.join(MIRANDMORE_HOME,"annotations","mirbase",blob)
         in_file = HAIRPIN_EXTENDED_BLOB
-        with open(in_file,"r") as f:
+        with open(in_file,"rb") as f:
             self.data = pickle.load(f)
 
     def getDNA(self,hairpin,start,end):
@@ -264,7 +265,8 @@ def mature_couple_score(m1,m2,match_dict, SISTER_OVERHANG_LEN):
     overhang_score = 0
     mismatches = 0
     m1_len = m1.end - m1.start + 1
-    for i in xrange(m1.start,m1.end+1):
+    #for i in xrange(m1.start,m1.end+1):
+    for i in range(m1.start,m1.end+1):
         match_pos =  match_dict.get(i)
         if match_pos and match_pos >= m2.start and match_pos <= m2.end:   #and in_m2(match_pos):
             score += 1
@@ -282,7 +284,7 @@ def hairpin_summary(name, MATURE_TABLE, HAIRPIN_ANNOTATION_BLOB):
 #    with open(os.path.join(MIRANDMORE_HOME,"annotations","mirbase","hairpin." + SPECIES + ".annotations.blob")) as f:
 #       annotations_table = pickle.load(f)
     table = build_pre_to_mature_table(MATURE_TABLE)
-    with open(HAIRPIN_ANNOTATION_BLOB) as f:
+    with open(HAIRPIN_ANNOTATION_BLOB, 'rb') as f:
        annotations_table = pickle.load(f)
     m1, m2  = table[name]
     match_dict = rnafold_to_dict(annotations_table[name].structure)
@@ -294,7 +296,7 @@ class Oracle:
     def __init__(self,mature_table,annotations):
         self.table = build_pre_to_mature_table(mature_table)
         #with open(os.path.join(MIRANDMORE_HOME,"annotations","mirbase",annotations)) as f:
-        with open(annotations) as f:
+        with open(annotations, 'rb') as f:
             self.annotations_table = pickle.load(f)
 
     def is_mature_sister(self,rna_,mature, SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD):
@@ -303,7 +305,8 @@ class Oracle:
         mismatches = 0
         rna_len = rna_.end - rna_.start + 1
         match_dict = rnafold_to_dict(self.annotations_table[mature.pre].structure)
-        for i in xrange(rna_.start,rna_.end+1):
+        #for i in xrange(rna_.start,rna_.end+1):
+        for i in range(rna_.start,rna_.end+1):
             match_pos =  match_dict.get(i)
             if match_pos and match_pos >= mature.start and match_pos <= mature.end: #and in_mature(match_pos):
                 score += 1
@@ -321,7 +324,8 @@ class Oracle:
         mismatches = 0
         rna_len = rna_.end - rna_.start + 1
         match_dict = rnafold_to_dict(self.annotations_table[mature.pre].structure)
-        for i in xrange(rna_.start,rna_.end+1):
+        #for i in xrange(rna_.start,rna_.end+1):
+        for i in range(rna_.start,rna_.end+1):
             match_pos =  match_dict.get(i)
             if match_pos and match_pos >= mature.start and match_pos <= mature.end:   #and in_mature(match_pos):
                 score += 1
@@ -337,8 +341,11 @@ class Oracle:
 
     def get_shadow(self,mature):
         match_dict = rnafold_to_dict(self.annotations_table[mature.pre].structure)
-        matching_positions =  map(lambda x: match_dict.get(x),xrange(mature.start,mature.end + 1))
-        matching_positions =  filter(lambda x: not x == None,matching_positions)
+        #matching_positions =  map(lambda x: match_dict.get(x),xrange(mature.start,mature.end + 1))
+        matching_positions =  map(lambda x: match_dict.get(x), 
+                                  range(mature.start, mature.end + 1))
+        matching_positions =  list(filter(lambda x: not x == None, 
+                                          matching_positions))
 
         ## WARNING: it might happens that there is no matching positions in the folding
         ## TODO: raise some an exception here/handle the case.
@@ -688,7 +695,8 @@ class PreSummary:
                     raise TwoMatureAssignmentError("Can't assign rna '%s' in "\
                                                    "pre '%s'. %s" % (rna_, 
                                                                      self.name, 
-                                                                     tmae.message))
+                                                                     tmae))
+                                                                     #tmae.message))
             if not(self._assign(rna_)):
                 # pdb.set_trace()
                 raise AssignmentError("Can't assign rna '%s' in pre '%s' " % (rna_,self.name))

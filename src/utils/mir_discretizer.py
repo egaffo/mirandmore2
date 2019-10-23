@@ -62,7 +62,7 @@ class Processor:
         with_assignment_issues = 0
 
         ## load exact alignments (as processed by dump_exact_blob.py)
-        with open(self.exact) as b:
+        with open(self.exact, 'rb') as b:
             blob = pickle.load(b)
 
         ## open the assignment log file
@@ -77,10 +77,12 @@ class Processor:
                 try:
                     presummary.populate(rna_generator(pre_blob, self.NEW_RNA_OBJECT_THRESHOLD))
                 except AssignmentError as e:
-                    log.write(e.message + "\n")
+                    #log.write(e.message + "\n")
+                    log.write(str(e) + "\n")
                     with_assignment_issues += 1
                 except TwoMatureAssignmentError as e:
-                    log.write(e.message + "\n")
+                    #log.write(e.message + "\n")
+                    log.write(str(e) + "\n")
                     with_assignment_issues += 1
                 finally:
                     presummary.clean()
@@ -89,7 +91,7 @@ class Processor:
             log.write("%d rna objects with assignment issues\n" % with_assignment_issues)
         
         ## write the precursors_summary data in a python-friendly file format
-        with open(self.base_name + "_pre_summary.blob", "w") as presummary_blob:
+        with open(self.base_name + "_pre_summary.blob", "wb") as presummary_blob:
             pickle.dump(self.data, presummary_blob)
 
 #    def is_not_exact(self,name,entry):

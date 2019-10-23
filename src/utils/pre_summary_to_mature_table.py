@@ -24,7 +24,7 @@ def main():
    
     args = parser.parse_args()
 
-    with open(args.pre) as pre:
+    with open(args.pre, 'rb') as pre:
         pre_summary_blob = pickle.load(pre)
 
     known_matures_tab = defaultdict(dict)

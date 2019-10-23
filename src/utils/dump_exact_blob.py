@@ -6,7 +6,8 @@ import sys
 from collections import defaultdict
 from itertools import groupby
 from operator import itemgetter
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 from rna import build_pre_to_mature_table, PreExactResultSet #MIRANDMORE_HOME, 
 from coroutines import  SamPump, SamCountFilter, MultipleHitsGenomicFilter, Meter, Filter 
 import argparse
