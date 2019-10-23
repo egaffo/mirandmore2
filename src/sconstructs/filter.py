@@ -31,7 +31,7 @@ report = env['SAMPLE'] +"_raw_filter_report.txt"
 
 targets = [target, report]
 
-filtered_cmd = '''filter_trimmed.py -i ${SOURCE} -o - '''
+filtered_cmd = '''filter_trimmed.py -i ${SOURCE} '''
 if not env['LONG_READS_FILE'] == '':
     filtered_cmd = filtered_cmd + '''-L ${TARGETS[2]} '''
     targets.append(env['LONG_READS_FILE'])
