@@ -547,7 +547,7 @@ class PreSummary:
                     self.five_prime_mir  = rna_
                 try:
                     rna_.name = name_of_sister(self.name, mature)
-                except NamingError, ne:
+                except NamingError as ne:
                     rna_.name = mature.name + "*"
                     ## TODO: set a proper logging system
                     sys.stderr.write("WARNING: {} may have a non standard name."\
@@ -556,38 +556,38 @@ class PreSummary:
         return False
 
     def try_as_loop(self,rna_):
-		rna_midpoint = midpoint(rna_)
-		if self.n_matures == 2:
-	   	    if self.matures[0].order == "5p":	
-			    end = self.matures[0].end
-			    start = self.matures[1].start
-		    else:
-				end = self.matures[1].end
-				start = self.matures[0].start
-		elif self.n_matures == 1:
-			if self.five_prime_mir:
-				end = self.five_prime_mir.end
-				if self.matures[0].order == "5p":
-					return False		
-				if self.matures[0].order == "3p":
-				   start = self.matures[0].start
-			elif self.three_prime_mir:
-				start = self.three_prime_mir.start
-				if self.matures[0].order == "3p":
-					return False		
-				if self.matures[0].order == "5p":
-				   end = self.matures[0].end
-			else:
-				return False	
-		else:
-			raise AssignmentError("Can't assign '%s' in pre '%s'. "\
-			"Trying sequence as loop failed because none mature miRNAs is known. "\
-			"This should not happen!" % (rna_, self.name))
-		if rna_midpoint > end and rna_midpoint < start:
-		        self.loop = rna_
-		        rna_.name = name_of_loop(self.name)
-		        return True
-		return False
+        rna_midpoint = midpoint(rna_)
+        if self.n_matures == 2:
+            if self.matures[0].order == "5p":	
+        	    end = self.matures[0].end
+        	    start = self.matures[1].start
+            else:
+                end = self.matures[1].end
+                start = self.matures[0].start
+        elif self.n_matures == 1:
+            if self.five_prime_mir:
+            	end = self.five_prime_mir.end
+            	if self.matures[0].order == "5p":
+            		return False		
+            	if self.matures[0].order == "3p":
+            	   start = self.matures[0].start
+            elif self.three_prime_mir:
+            	start = self.three_prime_mir.start
+            	if self.matures[0].order == "3p":
+            		return False		
+            	if self.matures[0].order == "5p":
+            	   end = self.matures[0].end
+            else:
+            	return False	
+        else:
+        	raise AssignmentError("Can't assign '%s' in pre '%s'. "\
+        	"Trying sequence as loop failed because none mature miRNAs is known. "\
+        	"This should not happen!" % (rna_, self.name))
+        if rna_midpoint > end and rna_midpoint < start:
+                self.loop = rna_
+                rna_.name = name_of_loop(self.name)
+                return True
+        return False
 
 
     def try_as_mor(self,rna_):
@@ -683,9 +683,12 @@ class PreSummary:
         if not assigned:
             if not (self.five_prime_mir and self.three_prime_mir):
                 try:
-		    self.inject_mock()
-		except TwoMatureAssignmentError, tmae:
-		    raise TwoMatureAssignmentError("Can't assign rna '%s' in pre '%s'. %s" % (rna_, self.name, tmae.message))
+                    self.inject_mock()
+                except TwoMatureAssignmentError as tmae:
+                    raise TwoMatureAssignmentError("Can't assign rna '%s' in "\
+                                                   "pre '%s'. %s" % (rna_, 
+                                                                     self.name, 
+                                                                     tmae.message))
             if not(self._assign(rna_)):
                 # pdb.set_trace()
                 raise AssignmentError("Can't assign rna '%s' in pre '%s' " % (rna_,self.name))

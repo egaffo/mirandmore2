@@ -53,7 +53,7 @@ class FirstPipelineThread(Thread):
                 msg = self.coro.next()
             except StopIteration:
                 break
-            except Exception, exc:
+            except Exception as exc:
                 self.out_queue.put(PipelineError(exc))
                 return
             
@@ -98,7 +98,7 @@ class MiddlePipelineThread(Thread):
             # Invoke the current stage.
             try:    
                 out = self.coro.send(msg)
-            except Exception, exc:
+            except Exception as exc:
                 self.out_queue.put(PipelineError(exc))
                 return
             
@@ -135,7 +135,7 @@ class LastPipelineThread(Thread):
             # Send to consumer.
             try:
                 self.coro.send(msg)
-            except Exception, exc:
+            except Exception as exc:
                 self.exc = exc
                 return
         

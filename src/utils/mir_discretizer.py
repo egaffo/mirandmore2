@@ -76,10 +76,10 @@ class Processor:
                                             self.SISTER_MATCHES_THRESHOLD)
                 try:
                     presummary.populate(rna_generator(pre_blob, self.NEW_RNA_OBJECT_THRESHOLD))
-                except AssignmentError, e:
+                except AssignmentError as e:
                     log.write(e.message + "\n")
                     with_assignment_issues += 1
-                except TwoMatureAssignmentError, e:
+                except TwoMatureAssignmentError as e:
                     log.write(e.message + "\n")
                     with_assignment_issues += 1
                 finally:
