@@ -19,7 +19,7 @@ Decider('MD5-timestamp')
 
 TOOLS = os.path.join(env['ENV']['MIRANDMORE_HOME'], 'tools')
 BIN = os.path.join(env['ENV']['MIRANDMORE_HOME'],'bin')
-PYTHON_LIB = os.path.join(TOOLS, 'lib', 'python2.7','site-packages')
+PYTHON_LIB = os.path.join(TOOLS, 'lib', 'python3.5','site-packages')
 
 env.PrependENVPath('PYTHONUSERBASE', TOOLS)
 env.PrependENVPath('PYTHONPATH', PYTHON_LIB)
