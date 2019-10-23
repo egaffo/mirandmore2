@@ -52,10 +52,10 @@ HTSeq = env.Command(HTSeq_target, [pip],
 env.Command(os.path.join(BIN, "${SOURCE.file}"), HTSeq[1], SymLink)
 
 # STREAM
-stream_dir = os.path.join(PYTHON_LIB)
-stream_target = [os.path.join(stream_dir, 'stream.py')]
-stream = env.Command(stream_target, [pip], 
-                    ['pip install --ignore-installed --user stream'])
+#stream_dir = os.path.join(PYTHON_LIB)
+#stream_target = [os.path.join(stream_dir, 'stream.py')]
+#stream = env.Command(stream_target, [pip], 
+#                    ['pip install --ignore-installed --user stream'])
 
 
 ## RNAfold

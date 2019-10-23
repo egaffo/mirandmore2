@@ -4,7 +4,7 @@ import pdb
 import os
 import cPickle as pickle
 from Bio import pairwise2
-import stream
+#import stream
 from functools import partial
 import re
 import sys
@@ -637,10 +637,41 @@ class PreSummary:
 
 
     def _assign(self,rna_):
-        methods = map(partial(getattr,self),PreSummary.ass_methods)
-        methods = map(lambda x:  partial(x,rna_=rna_),methods)
-        assigned = iter(methods) >> stream.dropwhile(lambda x: not x()) >> stream.take(1) >> list
-        return assigned
+                
+        ## This code will apply every method defined in the PreSummary class
+        ## to the rna_ object (that is a pack of reads/alignments) and 
+        ## save the results to a list of booleans telling which methods
+        ## were able to assign the read pack. In other words, this code
+        ## will check if the read pack can be assigned to any element 
+        ## on the miRNA precursor (i.e. 5' moR, 5' miR, loop, 3' miR and 
+        ## 3' moR), but since it tries all precursor elements, it could 
+        ## be assigned to more than one element (then the result list 
+        ## will have > 1 True values).
+        #assigned = []
+        #for method in PreSummary.ass_methods:
+        #    #assigned.append(getattr(self, method)(rna_))?
+        #    if getattr(self, method)(rna_):
+        #       assigned.append(rna_)
+        ## check for ambiguous assignments
+        ##if sum(assigned) > 1:
+        ##    log.debug.write('''WARNING: read assigned to multiple elements '''
+        ##              '''in precursor''')
+        #return any(assigned)
+
+        ## Different behaviour would be 'stop checking as soon as the 
+        ## read pack is assigned' if using the inline any(), since the 
+        ## any() function stops iterating at the first True value
+        ## Doing so, (i) it is not possible to check possible multiple 
+        ## assignments, and (ii) a possible assignment bias is introduced 
+        ## in favour of 'left-sided' elements in the precursor 
+        return any(getattr(self, method)(rna_) for method in PreSummary.ass_methods)
+        
+        ## old code using the stream package (deprecated)
+        #methods = map(partial(getattr,self),PreSummary.ass_methods)
+        #methods = map(lambda x:  partial(x,rna_=rna_),methods)
+        #assigned = iter(methods) >> stream.dropwhile(lambda x: not x()) >> stream.take(1) >> list
+        #return assigned
+      
 
     def assign(self,rna_):
         assigned = self._assign(rna_)
