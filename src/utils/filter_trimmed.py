@@ -8,6 +8,40 @@ from __future__ import print_function
 import argparse, gzip, HTSeq, sys
 import multiprocessing as mp
 
+
+def filter_n_split_read(read, min_base_qual, mean_quality, 
+                        max_length, outfile, long_read_file):
+    
+    global processed_read_count
+    global low_mean_base_qual_read
+    global long_read_count
+    global low_base_qual_read_count
+
+    #with processed_read_count.get_lock()
+    processed_read_count += 1
+    read_len = len(read.qual)
+    read_mean_qual = sum(read.qual)/float(read_len)
+    read_lowqual_bases = sum(read.qual < min_base_qual)
+    
+    if read_lowqual_bases < 2:
+        if read_mean_qual >= mean_quality:
+            if read_len <= max_length:
+                read.write_to_fastq_file(outfile)
+
+            else:
+                long_read_count += 1
+                if not args.long_read_file == '':
+                    read.write_to_fastq_file(long_read_file)
+
+        else:
+            low_mean_base_qual_read += 1
+
+    else:
+        low_base_qual_read_count += 1
+
+    return None
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -82,32 +116,19 @@ if __name__ == '__main__':
         else:
             long_read_file = open(args.long_read_file, 'w')
 
+    ## initialize global variables
     low_base_qual_read_count = 0
     low_mean_base_qual_read  = 0
     long_read_count = 0
     processed_read_count = 0
 
     for read in fastq_file:
-        processed_read_count += 1
-        read_len = len(read.qual)
-        read_mean_qual = sum(read.qual)/float(read_len)
-        read_lowqual_bases = sum(read.qual < args.min_base_qual)
-        
-        if read_lowqual_bases < 2:
-            if read_mean_qual >= args.mean_quality:
-                if read_len <= args.max_length:
-                    read.write_to_fastq_file(outfile)
-
-                else:
-                    long_read_count += 1
-                    if not args.long_read_file == '':
-                        read.write_to_fastq_file(long_read_file)
-
-            else:
-                low_mean_base_qual_read += 1
-
-        else:
-            low_base_qual_read_count += 1
+        filter_n_split_read(read, 
+                            args.min_base_qual, 
+                            args.mean_quality, 
+                            args.max_length, 
+                            outfile, 
+                            long_read_file)
 
     if not args.long_read_file == '':
         long_read_file.close()
