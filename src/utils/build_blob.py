@@ -2,7 +2,8 @@
 
 import sys, re, argparse
 from rna import PreAnnotation
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 import HTSeq
 
 def build_hairpins_annotations(target,source,env):
@@ -32,13 +33,15 @@ def build_fa_blob(target,source,env):
     target = str(target[0])
     source = str(source[0])
     
-    with open(source,"r") as f:
+    with open(source, "r") as f:
         stream = HTSeq.FastaReader(f)
+        
         for entry in stream:
             d[entry.name] = entry.seq
             
-    with open(target,"w") as f:
-        pickle.dump(d,f)
+    with open(target, "wt") as f:
+        pickle.dump(d, f)
+
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
