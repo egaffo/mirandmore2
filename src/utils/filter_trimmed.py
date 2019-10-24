@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     ## handle compressed files 
     if args.fastq_file.endswith('.gz'):
-        f = gzip.open(args.fastq_file, 'rb')
+        f = gzip.open(args.fastq_file, 'rt')
 
     elif args.fastq_file == '-':
         f = sys.stdin
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         outfile = sys.stdout
     
     elif args.output.endswith('.gz'):
-        outfile = gzip.open(args.output, 'wb')
+        outfile = gzip.open(args.output, 'wt')
     else:
         outfile = open(args.output, 'w')
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         
         ## get file handler to save discarded reads from length filter
         if args.long_read_file.lower().endswith(".gz"):
-            long_read_file = gzip.open(args.long_read_file, 'wb')
+            long_read_file = gzip.open(args.long_read_file, 'wt')
         
         else:
             long_read_file = open(args.long_read_file, 'w')
