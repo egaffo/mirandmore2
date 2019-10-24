@@ -6,6 +6,7 @@ Filter FASTQ reads according to quality and length
 
 from __future__ import print_function
 import argparse, gzip, HTSeq, sys
+import multiprocessing as mp
 
 if __name__ == '__main__':
 
