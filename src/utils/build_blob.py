@@ -24,8 +24,8 @@ def build_hairpins_annotations(target,source,env):
             pre = PreAnnotation(name=name,seq=seq,structure=structure,energy=energy)
             d[name] = pre
             
-    with open(target,"w") as f:
-        pickle.dump(d,f)
+    with open(target, "wb") as f:
+        pickle.dump(d, f)
 
 ## TODO: implement using Bio.SeqIO instead of HTSeq to reduce requirements
 def build_fa_blob(target,source,env):
@@ -39,7 +39,7 @@ def build_fa_blob(target,source,env):
         for entry in stream:
             d[entry.name] = entry.seq
             
-    with open(target, "wt") as f:
+    with open(target, "wb") as f:
         pickle.dump(d, f)
 
 if __name__ == '__main__':
