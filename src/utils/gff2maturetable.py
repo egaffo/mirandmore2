@@ -14,7 +14,7 @@ def gff2maturetable(target, source, env):
     pattern = 'chr'
     try:
         pattern = env['CHRM_PREFIX']
-    except KeyError, e:
+    except KeyError as e:
         sys.stderr('''WARNING: chromosome prefix not specified. '''\
                    '''Will remove default pattern '{}' from chromosome names'''.format(pattern))
     if ext.lower() == 'gff3':
@@ -74,7 +74,7 @@ def gff2maturetable(target, source, env):
                                                 str(mir_in_pre_end),
                                                 str(pre_length)]
                                               )
-                        except KeyError, e:
+                        except KeyError as e:
                             sys.stderr.write('''WARNING: precursor ID {0} not found for miR {1}.'''\
                                        ''' Be sure that miRNA_primary_transcript feature '''\
                                        '''preceeds relative miRNA feature. '''\
