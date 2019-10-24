@@ -3,7 +3,8 @@
 import argparse
 from itertools import groupby
 from rna import reverse_complement
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
 
 def align_generator(filename):
     with open(filename,"r") as f:
@@ -27,7 +28,7 @@ def main():
     for k,l in groupby(the_align_generator):
         d_[k]=len(list(l))
 
-    with open(args.output,"w") as out:
+    with open(args.output,"wb") as out:
         pickle.dump(d_,out)
 
 
