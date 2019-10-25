@@ -9,68 +9,12 @@ import argparse, gzip, HTSeq, sys
 import multiprocessing as mp
 from multiprocessing import Pool, Value
 
-### https://gist.github.com/ngcrawford/2237170
-#from itertools import izip_longest
-#
-#def process_chunk(d):
-#    """Replace this with your own function
-#    that processes data one line at a
-#    time"""
-#
-#    d = d.strip() + ' processed'
-#    return d 
-#
-#def grouper(n, iterable, padvalue=None):
-#    """grouper(3, 'abcdefg', 'x') -->
-#    ('a','b','c'), ('d','e','f'), ('g','x','x')"""
-#
-#    return izip_longest(*[iter(iterable)]*n, fillvalue=padvalue)
-#
-#def main():
-#p = multiprocessing.Pool(4)
-#
-#    # Use 'grouper' to split test data into
-#    # groups you can process without using a
-#    # ton of RAM. You'll probably want to 
-#    # increase the chunk size considerably
-#    # to something like 1000 lines per core.
-#
-#    # The idea is that you replace 'test_data'
-#    # with a file-handle
-#    # e.g., testdata = open(file.txt,'rU')
-#
-#    # And, you'd write to a file instead of
-#    # printing to the stout
-#
-#    for chunk in grouper(10, test_data):
-#       results = p.map(process_chunk, chunk)
-#      for r in results:
-#                  print r
-#                  # replace
-#                  # with
-#                  # outfile.write()
+def filter_n_split_read(intuple):
 
-def mirna_reads_writer(q):
-    ## assume a outfile file handler has been instantiated
-    while 1:
-        read = q.get()
-        if str(read) == 'kill':
-            break
-        outfile.write('\n'.join(read) + '\n')
-        outfile.flush()
-
-def long_reads_writer(q):
-    ## assume a long_read_file file handler has been instantiated
-    while 1:
-        read = q.get()
-        if str(read) == 'kill':
-            break
-        if long_read_file:
-            long_read_file.write('\n'.join(read) + '\n')
-            long_read_file.flush()
-
-def filter_n_split_read(read, min_base_qual, mean_quality, max_length, 
-                        outfile_queue, long_read_file_queue):
+    read = intuple[0]
+    min_base_qual = intuple[1] 
+    mean_quality = intuple[2]
+    max_length = intuple[3]
     
     global processed_read_count
     global low_mean_base_qual_read
@@ -90,18 +34,21 @@ def filter_n_split_read(read, min_base_qual, mean_quality, max_length,
 
     ## format FASTQ entry to print
     read = ('@' + read[1], read[0], '+', read[2])
+
+    ## default no filter passing code
+    filter_code = -1
    
     if read_lowqual_bases < 2:
         if read_mean_qual >= mean_quality:
             if read_len <= max_length:
-                ## save to reads-passing-filters file
-                outfile_queue.put(read)
+                ## set reads-passing-filters file code
+                filter_code = 0
 
             else:
                 with long_read_count.get_lock():
                     long_read_count.value += 1
-                ## save to lenght-discarded read file
-                long_read_file_queue.put(read)
+                ## set lenght-discarded read file code
+                filter_code = 1
 
         else:
             with low_mean_base_qual_read.get_lock():
@@ -111,7 +58,8 @@ def filter_n_split_read(read, min_base_qual, mean_quality, max_length,
         with low_base_qual_read_count.get_lock():
             low_base_qual_read_count.value += 1
 
-    return None
+    ## return filter code and FASTQ formatted read
+    return (filter_code, read)
 
 
 if __name__ == '__main__':
@@ -179,56 +127,54 @@ if __name__ == '__main__':
     fastq_file = HTSeq.FastqReader(f, 
                                    args.quality_encoding,
                                    raw_iterator = True)
-
+    
+    ## open file to save reads passing the filters
     if args.output == '-':
         outfile = sys.stdout
     
     elif args.output.endswith('.gz'):
-        outfile = gzip.open(args.output, 'wt')
+        outfile = gzip.open(args.output, 'wt', compresslevel = 6)
+
     else:
         outfile = open(args.output, 'w')
-
+    
+    ## if enabled, open the file to save length-discarded reads
     long_read_file = None
     if not args.long_read_file == '':        
-        ## get file handler to save discarded reads from length filter
+        ## get file handler
         if args.long_read_file.lower().endswith(".gz"):
-            long_read_file = gzip.open(args.long_read_file, 'wt')
+            long_read_file = gzip.open(args.long_read_file, 'wt', 
+                                       compresslevel = 6)
         
         else:
             long_read_file = open(args.long_read_file, 'w')
 
-    ## initialize global variables
+    ## initialize (global) counter variables
     low_base_qual_read_count = Value('i', 0)
     low_mean_base_qual_read  = Value('i', 0)
     long_read_count = Value('i', 0)
     processed_read_count = Value('i', 0)
 
-    manager = mp.Manager()
-    
     pool = mp.Pool(processes = args.jobs)
 
-    outfile_queue = manager.Queue()
-    watcher_1 = pool.apply_async(mirna_reads_writer, (outfile_queue,))
-
-    long_read_file_queue = manager.Queue()
-    watcher_2 = pool.apply_async(long_reads_writer, (long_read_file_queue,))
-
-    #res = pool.starmap(filter_n_split_read, 
-    res = pool.starmap_async(filter_n_split_read, 
+    ## loop input and pass it to multiple processes
+    ## while reading results as soon as they are computed
+    for res in pool.imap(filter_n_split_read, 
                              [(read,
                                args.min_base_qual, 
                                args.mean_quality, 
-                               args.max_length,
-                               outfile_queue,
-                               long_read_file_queue) for read in fastq_file], 
-                             chunksize = 10000)
+                               args.max_length) for read in fastq_file], 
+                             chunksize = 10000):
+        if res[0] == 0:
+            outfile.write('\n'.join(res[1]) + '\n')
+
+        elif res[0] == 1 and long_read_file:
+            long_read_file.write('\n'.join(res[1]) + '\n')
     
-    outfile_queue.put('kill')
-    long_read_file_queue.put('kill')
     pool.close()
     pool.join()
 
-    if not args.long_read_file == '':
+    if long_read_file:
         long_read_file.close()
     
     outfile.close()
