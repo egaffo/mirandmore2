@@ -39,7 +39,7 @@ if not env['LONG_READS_FILE'] == '':
 filtered_cmd = filtered_cmd + \
                '''-l $MAX_LEN_FILTER -q $MEAN_QUAL_FILTER '''\
                '''-e $QUALITY_ENCODING -r ${TARGETS[1]} -p 20 '''\
-               '''-o ${TARGETS[0]}'''
+               '''-o ${TARGETS[0]} $(-j $CPUS $) '''
 
 filtered = env.Command(targets, 
                        env['READS'], 
