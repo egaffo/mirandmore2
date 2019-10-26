@@ -33,7 +33,7 @@ except NameError:
 env.SetDefault(ADPT_OVERLAP = 5)
 env.SetDefault(MIN_LEN = 15)
 
-cutadapt_cmd = '''cutadapt $( -j $CPUS --quiet $) -a $ADAPTER '''\
+cutadapt_cmd = '''cutadapt $( -j $CPUS $) -a $ADAPTER '''\
                '''--no-indels -n 10 -O $ADPT_OVERLAP '''\
                '''--quality-base $QUALITY_ENCODING -m $MIN_LEN -M $MAX_LEN_FILTER '''\
                '''--trimmed-only '''\
