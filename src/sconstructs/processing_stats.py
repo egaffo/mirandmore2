@@ -22,7 +22,12 @@ read_quality_stats_dir = 'read_quality_stats'
 ## COLLECT TRIMMING STATISTICS
 env_summarize_depth = env.Clone()
 trim_results = [results[s]['trimmed'] for s in samples.keys()]
-env_summarize_depth['TRIMMING_REPORT_FILES'] = get_matching_nodes(trim_results, ".*_trimming_report\.txt")
+trimming_report_file = '.*_cutadapt\.log'
+if env['TRIMMER'] == 'fastxtoolkit':
+    trimming_report_file = ".*_trimming_report\.txt"
+
+env_summarize_depth['TRIMMING_REPORT_FILES'] = get_matching_nodes(trim_results, 
+                                                                  trimming_report_file)
 
 trimming_reports = SConscript(os.path.join(read_quality_stats_dir,
                                            'summarize_depth.py'),
