@@ -1,28 +1,16 @@
 #!/usr/bin/env python
-import HTSeq
-import sys
-import os
-import csv
+import HTSeq, sys, os, csv, pickle, re, argparse
 from collections import defaultdict
 from itertools import groupby
 from operator import itemgetter
-#import cPickle as pickle
-import pickle
-import re
-from rna import MatureResultSet, PreResultSet, Mature, build_pre_to_mature_table#, MIRANDMORE_HOME
-#from config import ALLOWED_OVERHANG, ALLOWED_OVERHANG_MORNA, EXACT, SHORTER_OR_LONGER, MIS_1, MIS_2, FIVE_PRIME, THREE_PRIME, MIN_COUNT
-from coroutines import  SamPump, SamCountFilter, MultipleHitsGenomicFilter, Meter, Filter
+from rna import MatureResultSet, PreResultSet, Mature, build_pre_to_mature_table
+from coroutines import SamPump, SamCountFilter, MultipleHitsGenomicFilter, Filter
 from pipeline import Pipeline
-import argparse
-import pdb
 
 
 def overlap(alnmt, mature):
     return abs(alnmt.iv.start+1 - mature.start) <= ALLOWED_OVERHANG and \
            abs(alnmt.iv.end - mature.end) <= ALLOWED_OVERHANG
-
-#def is_morna(mature):
-#    return mature.name.find("moR")!=-1
 
 def extract(results, category):
     try:
@@ -30,48 +18,6 @@ def extract(results, category):
     except ValueError:
         idx = -1
     return idx
-
-#def is_exact_morna(alnmt, mature):
-#    mismatches = alnmt.optional_field("NM")
-#    morna_len  = alnmt.iv.end - alnmt.iv.start
-#
-#    five_prime_morna_exact = mature.order == "5p" and \
-#                             abs(alnmt.iv.end - mature.start) <= ALLOWED_OVERHANG_MORNA and \
-#                             alnmt.iv.chrom == mature.pre and \
-#                             mismatches == 0 and \
-#                             morna_len >= MIN_MORNA_LEN
-#
-#    three_prime_morna_exact = mature.order == "3p" and \
-#                              abs(alnmt.iv.start + 1 - mature.end) <= ALLOWED_OVERHANG_MORNA and \
-#                              alnmt.iv.chrom == mature.pre and \
-#                              mismatches == 0 and \
-#                              morna_len >= MIN_MORNA_LEN
-#
-#    if five_prime_morna_exact or three_prime_morna_exact:
-#        return True
-#
-#    return False
-#
-#def is_mismatch_1_morna(alnmt, mature):
-#    mismatches = alnmt.optional_field("NM")
-#    morna_len  = alnmt.iv.end - alnmt.iv.start
-#
-#    five_prime_morna_exact = mature.order == "5p" and \
-#                             abs(alnmt.iv.end - mature.start) <= ALLOWED_OVERHANG_MORNA and \
-#                             alnmt.iv.chrom == mature.pre and \
-#                             mismatches == 1 and \
-#                             morna_len >= MIN_MORNA_LEN
-#    three_prime_morna_exact = mature.order == "3p" and \
-#                              abs(alnmt.iv.start + 1 - mature.end) <= ALLOWED_OVERHANG_MORNA and \
-#                              alnmt.iv.chrom == mature.pre and \
-#                              mismatches == 1 and \
-#                              morna_len >= MIN_MORNA_LEN
-#
-#    if five_prime_morna_exact or three_prime_morna_exact:
-#        return True
-#
-#    return False
-
 
 def is_exact_mirna(alnmt, mature):
     if alnmt.iv.start + 1 == mature.start and \
@@ -122,9 +68,9 @@ class Processor(Filter):
         self.base_name = base_name
         self.mature_result_set = mature_result_set
         self.pre_result_set    = pre_result_set
+        self.unassigned_seq = {}
         
     def dump_stats(self, count_filter):
-        #pdb.set_trace()
         output = open(self.base_name + "_stats.txt","w")
         output.write("%s;%d\n" % ("reads kept", count_filter.keeped()))
         output.write("rejected because number of reads per tag < %d;%d\n" \
@@ -132,6 +78,33 @@ class Processor(Filter):
         output.write("hairpins with at least one read mapped;%d\n" \
                      % (len(self.pre_result_set.keys())))
         output.close()
+
+    def dump_unassigned_log(self):
+        ## print one line per sequence in a table format where
+        ## 1st column is the sequence name, 
+        ## 2nd column is the count of multimaps on precursors
+        ## 3rd column is the positions of alignments, with mismatches
+        ##                   formatted as '|' separated list of
+        ##                   precursor:start:end:number-of-mismatches
+
+        with open(self.base_name + '_unassigned_seqs.log', 'w') as out:
+            header = '\t'.join(['sequence', 'count', 'alignments_and_mismatches'])
+            out.write(header + '\n')
+
+            if bool(self.unassigned_seq):
+                for seq in self.unassigned_seq.keys():
+                    positions = []
+                    for pos in self.unassigned_seq[seq]['positions']:
+                        nm = self.unassigned_seq[seq]['positions'][pos]
+                        pos_with_nm = [str(tag) for tag in pos] + [str(nm)]
+                        positions.append(':'.join(pos_with_nm))
+
+                    line = '\t'.join([str(seq.decode()), 
+                                      str(self.unassigned_seq[seq]['count']),
+                                      '|'.join(positions)])
+
+                    out.write(line + '\n')
+
 
     def __call__(self):
         
@@ -234,38 +207,24 @@ class Processor(Filter):
                             if start != mature.start and end != mature.end:
                                 variant_end = "both"
                             
-                            #pdb.set_trace()
                             results.append( (SHORTER_OR_LONGER,) + base_data + (variant_end,))
                             was_assigned = True
 
-                        ## output also moRNA variants
-                        #elif is_exact_morna(alnmt, mature):
-                        #    ## TODO: fix moR name (let miRs, etc.)
-                        #    #sys.stderr.write("Exact moR in " + str(mature) + "\n")
-                        #    mor_name = mature_name.replace("miR", "moR")
-                        #    base_data = (mor_name, sequence, pre_name, start, end)
-                        #    results.append( (EXACT,) + base_data + (variant_end,))
-                        #    was_assigned = True
-                        
-                        #elif is_mismatch_1_morna(alnmt, mature):
-                        #    ## TODO: fix moR name (let miRs, etc.)
-                        #    mor_name = mature_name.replace("miR", "moR")
-                        #    base_data = (mor_name, sequence, pre_name, start, end)
-                        #    before_mismatch = Processor.MD_RE.match(alnmt.optional_field("MD")).groups()[0]
-                        #    if int(before_mismatch) < alnmt.iv.length/2:
-                        #        variant_end = "5p"
-                        #    else:
-                        #        variant_end = "3p"
-                        
-                        #    results.append( (MIS_1,) + base_data + (variant_end,))
-                        #    #sys.stderr.write("Mismatch_1 moR in " + str(mature) + "\n")
-                        #    was_assigned = True
 
                 if alnmt.iv.strand == "+" and not was_assigned:
-                    ## TODO: set a logging at DEBUG level. Mind that the
-                    ## following output can be as large as the alignment file
-                    #sys.stderr.write("WARNING: sequence {0} unassigned.\n".format(str(alnmt)))
-                    pass
+                    
+                    ## keep track of unassigned sequences/alignmets
+                    position = (pre_name, start, end)
+                    
+                    if sequence not in self.unassigned_seq:
+                        self.unassigned_seq[sequence] = {'count': 1,
+                                                         'positions': {position: n_of_mismatches}}
+
+                    else:
+                        self.unassigned_seq[sequence]['count'] += 1
+
+                        if position not in self.unassigned_seq[sequence]['positions']:
+                            self.unassigned_seq[sequence]['positions'][position] = n_of_mismatches 
 
                 if alnmt.iv.strand != "+":
                     ## TODO: set a logging at DEBUG level. However, this check is
@@ -309,7 +268,6 @@ class Processor(Filter):
                                      "for mature {0}: {1} -> {2}".format(set(map(itemgetter(1), results)),
                                                                          str(categories),
                                                                          str(results)))
-                    #exit(1)
                 for result in results:
                     self.mature_result_set.add(result + (1/float(n_matures),))
                     self.pre_result_set.add(result + (1/float(n_pre),))
@@ -391,23 +349,13 @@ def main():
     processor = Processor(base_name, args.mature_table, MatureResultSet(), PreResultSet())
     sam_count_filter = SamCountFilter(MIN_COUNT)
     multiple_hits_filter = MultipleHitsGenomicFilter(args.threshold, args.genomic_hits)
-    #meter = Meter()
-    #processor = Processor(base_name, args.mature_table, MatureResultSet(), PreResultSet())
-    #processor = Processor(base_name, args.mature_table, MatureResultSet(), PreResultSet())
-    #sam_count_filter = SamCountFilter(it,MIN_COUNT)
-    #multiple_hits_filter = MultipleHitsGenomicFilter(sam_count_filter,args.threshold,args.genomic_hits)
-    #for name, alnmts in multiple_hits_filter:
-        #processor.process(alnmts)
-    #processor.dump()
-    #dump_stats(base_name,sam_count_filter,processor)
-    #multiple_hits_summary = multiple_hits_filter.summary()
-    #multiple_hits_summary.write_to_file(base_name+"_multiple_hits_summary.txt")
     processor.enqueue("dump")
     processor.enqueue("dump_stats", sam_count_filter)
     multiple_hits_filter.enqueue("write_summary", base_name + "_multiple_hits_summary.txt")
-    #pipe = Pipeline(sam_reader, meter, sam_count_filter,  multiple_hits_filter, processor)
+    processor.enqueue('dump_unassigned_log')
     pipe = Pipeline(sam_reader, sam_count_filter,  multiple_hits_filter, processor)
     pipe.run()
 
 if __name__ == "__main__":
     main()
+
