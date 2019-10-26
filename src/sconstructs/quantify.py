@@ -80,14 +80,14 @@ results_dict['PRE_UNMAPPED'] = sam2fastq
 env_serialize_alignments = env.Clone()
 env_serialize_alignments['SAM'] = aligned_to_hairpins[0]
 
-hairpin_alignments_blobs = SConscript(os.path.join(aligned_hairpins_dir, 
-                                                   mirandmore_serialize_alignments),
-                                      variant_dir = aligned_hairpins_dir, 
-                                      src_dir = SRC_DIR,
-                                      duplicate = 0, 
-                                      exports = '''env_serialize_alignments ''')
-results.append(hairpin_alignments_blobs)
-results_dict['HAIRPIN_ALIGNMENTS_BLOB'] = hairpin_alignments_blobs
+#hairpin_alignments_blobs = SConscript(os.path.join(aligned_hairpins_dir, 
+#                                                   mirandmore_serialize_alignments),
+#                                      variant_dir = aligned_hairpins_dir, 
+#                                      src_dir = SRC_DIR,
+#                                      duplicate = 0, 
+#                                      exports = '''env_serialize_alignments ''')
+#results.append(hairpin_alignments_blobs)
+#results_dict['HAIRPIN_ALIGNMENTS_BLOB'] = hairpin_alignments_blobs
 Clean('.', aligned_hairpins_dir)
 
 ## GENERATE SERIALIZED OBJECT (BLOB) OF EXACT ALIGNMENTS
@@ -172,6 +172,9 @@ new_hairpin_alignments_blobs = SConscript(os.path.join(unfiltered_variants_dir,
                                           src_dir = SRC_DIR,
                                           duplicate = 0, 
                                           exports = '''env_serialize_alignments ''')
+
+results.append(new_hairpin_alignments_blobs)
+results_dict['HAIRPIN_ALIGNMENTS_BLOB'] = new_hairpin_alignments_blobs
 
 Depends(new_hairpin_alignments_blobs, new_matures_table)
 
