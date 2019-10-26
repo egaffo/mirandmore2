@@ -33,7 +33,7 @@ class Processor:
     #def __init__(self, base_name, pre, exact, mature_table, annotations,
     def __init__(self, base_name, exact, mature_table, annotations,
                  MIN_MORNA_LEN, SPECIES, NEW_RNA_OBJECT_THRESHOLD, SISTER_OVERHANG_LEN, 
-                 SISTER_MATCHES_THRESHOLD):
+                 SISTER_MATCHES_THRESHOLD, ALLOWED_OVERHANG):
         ## the (extended) precursors annotations
         self.table = rna.build_pre_to_mature_table(mature_table)
         ## the (extended) precursors annotations as a dictionary (?)
@@ -51,6 +51,7 @@ class Processor:
         self.SPECIES                 = SPECIES
         self.SISTER_OVERHANG_LEN     = SISTER_OVERHANG_LEN
         self.SISTER_MATCHES_THRESHOLD= SISTER_MATCHES_THRESHOLD
+        self.ALLOWED_OVERHANG        = ALLOWED_OVERHANG
 
         ## the actual initializator of object's fields 
         self.process()
@@ -73,7 +74,8 @@ class Processor:
                 presummary = rna.PreSummary(name, self.table, self.oracle, 
                                             self.MIN_MORNA_LEN, self.SPECIES, 
                                             self.SISTER_OVERHANG_LEN, 
-                                            self.SISTER_MATCHES_THRESHOLD)
+                                            self.SISTER_MATCHES_THRESHOLD,
+                                            self.ALLOWED_OVERHANG)
                 try:
                     presummary.populate(rna_generator(pre_blob, self.NEW_RNA_OBJECT_THRESHOLD))
                 except AssignmentError as e:
@@ -184,6 +186,11 @@ def main():
                         type = int, required = True)
     parser.add_argument('-t', '--sister_matches_threshold', dest = 'SISTER_MATCHES_THRESHOLD', 
                         type = int, required = True)
+    parser.add_argument('-g', '--allowed_overhang', dest = 'ALLOWED_OVERHANG', 
+                        type = int, required = True,
+                        help = 'The allowed overhang (either '\
+                               'on the left and/or right) of alignment when '\
+                               'assigning reads to precursor elements')
 
     args = parser.parse_args()
 
@@ -192,6 +199,7 @@ def main():
     SPECIES                 = args.SPECIES
     SISTER_OVERHANG_LEN     = args.SISTER_OVERHANG_LEN
     SISTER_MATCHES_THRESHOLD= args.SISTER_MATCHES_THRESHOLD
+    ALLOWED_OVERHANG        = args.ALLOWED_OVERHANG
 
     #processor = Processor(args.base_name, args.pre, args.exact, 
     #                      args.mature_table, args.annotations)
@@ -199,7 +207,8 @@ def main():
     processor = Processor(args.base_name, args.exact, 
                           args.mature_table, args.annotations,
                           MIN_MORNA_LEN, SPECIES, NEW_RNA_OBJECT_THRESHOLD, 
-                          SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD)
+                          SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD,
+                          ALLOWED_OVERHANG)
     processor.write_normalized_table()
     #processor.write_excel_table()
 

@@ -475,7 +475,8 @@ class PreSummary:
     ass_methods = ["try_as_known_mir", "try_as_sister_mir", "try_as_loop", "try_as_mor"]
     
     def __init__(self, name, mature_table, oracle, MIN_MORNA_LEN, SPECIES,
-                 SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD):
+                 SISTER_OVERHANG_LEN, SISTER_MATCHES_THRESHOLD,
+                 ALLOWED_OVERHANG):
         self.name = name
         self.stdName = normalize_mir_name(name)
         self.suffix = mir_suffix(self.stdName, SPECIES)
@@ -493,6 +494,7 @@ class PreSummary:
         self.SPECIES = SPECIES
         self.SISTER_OVERHANG_LEN = SISTER_OVERHANG_LEN
         self.SISTER_MATCHES_THRESHOLD = SISTER_MATCHES_THRESHOLD
+        self.ALLOWED_OVERHANG = ALLOWED_OVERHANG
 
 
     def __repr__(self):
@@ -522,9 +524,17 @@ class PreSummary:
     def try_as_known_mir(self,rna_):
         for mature in self.matures:
             mature_mid_point = midpoint(mature)
-            if mature_mid_point > rna_.start and mature_mid_point < rna_.end: #\
-            #and mature.start-ALLOWED_OVERHANG <= rna_.start and \
-            #mature.end+ALLOWED_OVERHANG >= rna_.end:
+            ## we need to check (i) the rna_ is within the mature
+            ## (ii) the rna_ is not too long that it exceeds allowed overhangs
+            ## TODO: it could also be checked whether the rna_ midpoint
+            ## distantiates too much from the mature midpoint, f.i.
+            ## if we allow 2 nt around the mature midpoint:
+            ## if abs(mature_mid_point - midpoint(rna_)) <= 2 ...
+            ## or it could also be a fraction of the mature length, f.i. 10%
+            ## if abs(mature_mid_point - midpoint(rna_)) <= len(mature)/10 ...
+            if (mature_mid_point > rna_.start and mature_mid_point < rna_.end) \
+               and abs(rna_.start - mature.start) <= self.ALLOWED_OVERHANG \
+               and abs(rna_.end - mature.end) <= self.ALLOWED_OVERHANG:
                 if mature.order == "5p":
                     ## prevent the read pack trying to get an already assigned slot
                     if not self.five_prime_mir:

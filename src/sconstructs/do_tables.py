@@ -28,7 +28,6 @@ except NameError as ne:
 # one Excel friendly (_mir_table_excel.txt)
 # one python friendly (_pre_processed.blob)
 # Unassigned  RNA objects are listed in _assign.log
-# this is probably a mess now!
 
 OS_PATH_SEP = os.path.sep
 
@@ -48,6 +47,7 @@ cmdLine = '''mir_discretizer.py -e ${SOURCES[0]} '''\
           '''--min_morna_length $MIN_MORNA_LEN '''\
           '''--species_prefix $SPECIES --sister_overhang_len $SISTER_OVERHANG_LEN '''\
           '''--sister_matches_threshold $SISTER_MATCHES_THRESHOLD '''\
+          '''--allowed_overhang $ALLOWED_OVERHANG '''\
           '''${TARGETS[0].dir}%(OS_PATH_SEP)s$SAMPLE''' % locals() 
 
 tables = env.Command(targets, 
