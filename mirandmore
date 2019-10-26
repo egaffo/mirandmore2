@@ -1,6 +1,6 @@
 #!/bin/bash
 export MIRANDMORE_HOME=$(dirname $(readlink -f $0))
 export PYTHONPATH=$MIRANDMORE_HOME/lib:$MIRANDMORE_HOME/lib/python3.5/site-packages:$PYTHONPATH
-export PATH=$MIRANDMORE_HOME/tools/bin:$MIRANDMORE_HOME/bin:$PATH
+export PATH=$MIRANDMORE_HOME/bin:$PATH
 #export R_LIBS="$MIRANDMORE_HOME/tools/R_libs"
 scons -f $MIRANDMORE_HOME/src/sconstructs/main.py $1
