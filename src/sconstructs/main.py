@@ -67,7 +67,14 @@ vars.Add('NM_BOWTIE_PARAMS', 'Parameters to be passed to Bowtie to align non-miR
          '-n 0 -l 26 -e 70 --best --strata -k 5 -m 5 --mm')
 
 vars.Add('NOADAPTER', 'Set "True" if adapters were already trimmed in  input reads. '\
-	 'This will skip adapter trimming step.', False)
+	     'This will skip adapter trimming step.', False)
+
+vars.Add('TRIMMER', 'The tool to use for trimming read adapter. '\
+                    'Chose between cutadapt and fastxtoolkit', 
+         'cutadapt')
+
+vars.Add('CUTADAPT_EXTRA_PARAMS', '', '')
+
 
 env = Environment(ENV = os.environ,
                   variables = vars)
@@ -87,6 +94,22 @@ if env['NOADAPTER'] == 'True':
     env.Replace(NOADAPTER = True)
 else:
     env.Replace(NOADAPTER = False)
+
+## format read encoding and adapter parameters
+
+if env['ADAPTER'] == "classic":
+    primer = "TCGTATGCCGTCTTCTGCTTG"
+elif env['ADAPTER'] == "truseq":
+    primer = "TGGAATTCTCGGGTGCCAAGG"
+elif env['ADAPTER'] == "bmr":
+    primer = "TGGAATTCTCGGGTGCCAAGGAACTCCAGTCACCAG"
+elif env['ADAPTER'] == "vigneault":
+    primer  = "AACGGGCTAATATTTATCGGTGGC"
+else:
+    primer = env['ADAPTER']
+
+env.Replace(ADAPTER = primer)
+
 
 # directory to store miR&moRe configuration/setting files
 mirandmore_dbs_dir = 'mirandmore_dbs'
@@ -136,7 +159,12 @@ with open(env['META']) as csvfile:
 
 ## For each sample map unique reads to genome to predict novel precursors and miRNAs
 mirandmore_quality                 = 'read_quality_stats.py'
-mirandmore_trim                    = 'trim.py'
+if env['TRIMMER'] == 'fastxtoolkit':
+    mirandmore_trim                = 'trim.py'
+else:
+    if env['TRIMMER'] != 'cutadapt':
+        print('Trimmer', env['TRIMMER'], 'not available. Will use cutadapt.')
+    mirandmore_trim                = 'cutadapt.py'
 mirandmore_filter                  = 'filter.py'
 mirandmore_collapse                = 'collapse.py'
 mirandmore_align_uniques           = 'align_uniques.py'
@@ -169,11 +197,22 @@ for sample in sorted(samples.keys()):
         env_trim = env.Clone()
         env_trim['READS'] = readset
         env_trim['SAMPLE'] = sample
-        trimmed = SConscript(os.path.join(trim_dir, mirandmore_trim),
-                             variant_dir = trim_dir, 
-                             src_dir = SCONSCRIPT_HOME,
-                             duplicate = 0, 
-                             exports = 'env_trim')
+        offset2enc = {'phred':33, 'solexa':64}
+        env_trim.Replace(QUALITY_ENCODING = offset2enc[env['QUALITY_ENCODING']])
+
+        if env['TRIMMER'] == 'fastxtoolkit':
+            trimmed = SConscript(os.path.join(trim_dir, mirandmore_trim),
+                                 variant_dir = trim_dir, 
+                                 src_dir = SCONSCRIPT_HOME,
+                                 duplicate = 0, 
+                                 exports = 'env_trim')
+        else:
+            env_cutadapt = env_trim
+            trimmed = SConscript(os.path.join(trim_dir, mirandmore_trim),
+                                 variant_dir = trim_dir, 
+                                 src_dir = SCONSCRIPT_HOME,
+                                 duplicate = 0, 
+                                 exports = 'env_cutadapt')
 
     else:
         trimmed = [readset]
@@ -186,7 +225,9 @@ for sample in sorted(samples.keys()):
     env_filter = env.Clone()
     env_filter['READS'] = trimmed[0]
     env_filter['SAMPLE'] = sample
-    env_filter['LONG_READS_FILE'] = sample + "_length_discarded_reads.fq.gz" 
+    env_filter['LONG_READS_FILE'] = ''
+    if env['TRIMMER'] == 'fastxtoolkit':
+        env_filter['LONG_READS_FILE'] = sample + "_length_discarded_reads.fq.gz" 
     filtered = SConscript(os.path.join(filter_dir, mirandmore_filter),
                           variant_dir = filter_dir, 
                           src_dir = SCONSCRIPT_HOME,
@@ -213,7 +254,10 @@ for sample in sorted(samples.keys()):
     #                      duplicate = 0, exports = 'env_length_discarded')
     #results[sample]['length_discarded'] = length_discarded
     #Clean('.', length_discarded_dir)
-    results[sample]['length_discarded'] = filtered[2]
+    if env['TRIMMER'] == 'fastxtoolkit':
+        results[sample]['length_discarded'] = filtered[2]
+    else:
+        results[sample]['length_discarded'] = trimmed[2]
     
     ## COLLAPSE READS INTO UNIQUE SEQUENCES
     aligned_uniques_dir = os.path.join(sample_dir, "genomic_alignments")
