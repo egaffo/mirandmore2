@@ -52,7 +52,8 @@ class FirstPipelineThread(Thread):
             
             # Get the value from the generator.
             try:
-                msg = self.coro.next()
+                #msg = self.coro.next()
+                msg = next(self.coro)
             except StopIteration:
                 break
             except Exception as exc:
@@ -86,7 +87,8 @@ class MiddlePipelineThread(Thread):
 
     def run(self):
         # Prime the coroutine.
-        self.coro.next()
+        #self.coro.next()
+        next(self.coro)
         
         while True:
             # Get the message from the previous stage.
@@ -123,7 +125,8 @@ class LastPipelineThread(Thread):
 
     def run(self):
         # Prime the coroutine.
-        self.coro.next()
+        #self.coro.next()
+        next(self.coro)
 
         while True:
             # Get the message from the previous stage.
@@ -149,7 +152,7 @@ class Pipeline(object):
     is a coroutine that receives messages from the previous stage and
     yields messages to be sent to the next stage.
     """
-    def __init__(self, *stages):
+    def __init__(self, *stages, run_parallel = False):
         """Makes a new pipeline from a list of coroutines. There must
         be at least two stages.
         """
@@ -157,9 +160,13 @@ class Pipeline(object):
             raise ValueError('pipeline must have at least two stages')
         self.objs = stages
         self.stages = [stage() for stage in stages]
+        self.parallel = run_parallel
     
     def run(self):
-        return self.run_sequential()
+        if self.parallel:
+            return self.run_parallel()
+        else:
+            return self.run_sequential()
 
     def run_sequential(self):
         """Run the pipeline sequentially in the current thread. The
@@ -225,27 +232,32 @@ class Pipeline(object):
 if __name__ == '__main__':
     import time
     
-    def produce():
-        for i in range(5):
-            print('generating', i)
-            time.sleep(1)
-            yield i
-    def work():
-        num = yield
-        while True:
-            print('processing', num)
-            time.sleep(2)
-            num = yield num*2
-    def consume():
-        while True:
+    class Produce():
+        def __call__(self):
+            for i in range(5):
+                print('generating', i)
+                time.sleep(1)
+                yield i
+                
+    class Work():
+        def __call__(self):
             num = yield
-            time.sleep(1)
-            print('received', num)
+            while True:
+                print('processing', num)
+                time.sleep(2)
+                num = yield num
+    
+    class Consume():
+        def __call__(self):
+            while True:
+                num = yield
+                time.sleep(1)
+                print('received', num)
     
     ts_start = time.time()
-    Pipeline([produce(), work(), consume()]).run_sequential()
+    Pipeline(Produce(), Work(), Consume()).run_sequential()
     ts_middle = time.time()
-    Pipeline([produce(), work(), consume()]).run_parallel()
+    Pipeline(Produce(), Work(), Consume()).run_parallel()
     ts_end = time.time()
     
     print('Sequential time:', ts_middle - ts_start)
