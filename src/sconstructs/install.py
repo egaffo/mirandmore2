@@ -12,10 +12,26 @@ def SymLink(target, source, env):
                        os.path.abspath(str(target[0])))
     return None
 
+#vars = Variables('vars.py')
+vars = Variables()
+vars.Add('CPUS',
+         '',
+         1)
+
+env = Environment(ENV = os.environ,
+                  variables = vars)
+
+Help(vars.GenerateHelpText(env))
 
 env = Environment(ENV=os.environ, SHELL = '/bin/bash')
 
+if ARGUMENTS.get('CPUS', 0):
+    env['CPUS'] = ARGUMENTS.get('CPUS', 0)
+    
+
 Decider('MD5-timestamp')
+
+#env.SetDefault(CPUS = 1)
 
 TOOLS = os.path.join(env['ENV']['MIRANDMORE_HOME'], 'tools')
 BIN = os.path.join(env['ENV']['MIRANDMORE_HOME'],'bin')
@@ -48,10 +64,11 @@ BIOPYTHON = env.Command(BIOPYTHON_target, [pip],
 # HTSeq
 HTSeq_dir = os.path.join(PYTHON_LIB, 'HTSeq')
 HTSeq_target = [os.path.join(HTSeq_dir, '__init__.py'),
-                os.path.join(TOOLS, 'bin', 'htseq-count')]
+                os.path.join(BIN, 'htseq-count')]
 HTSeq = env.Command(HTSeq_target, [pip], 
                     ['pip install --ignore-installed --user HTSeq'])
-env.Command(os.path.join(BIN, "${SOURCE.file}"), HTSeq[1], SymLink)
+
+#env.Command(os.path.join(BIN, "${SOURCE.file}"), HTSeq[1], SymLink)
 
 # STREAM
 #stream_dir = os.path.join(PYTHON_LIB)
@@ -61,18 +78,18 @@ env.Command(os.path.join(BIN, "${SOURCE.file}"), HTSeq[1], SymLink)
 
 
 ## RNAfold
-RNAfold_dnwld = env.Command(os.path.join(TOOLS, "ViennaRNA-2.1.9.tar.gz"), 
-            Uri("http://www.tbi.univie.ac.at/RNA/download.php?id=viennarna-2.1.9"), 
+RNAfold_dnwld = env.Command(os.path.join(TOOLS, "ViennaRNA-2.4.14.tar.gz"), 
+            Uri("https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_4_x/ViennaRNA-2.4.14.tar.gz"), 
             "wget -q ${SOURCE} -O ${TARGET}")
-RNAfold_xtr = env.Command(os.path.join(TOOLS, "ViennaRNA-2.1.9/configure"), 
+RNAfold_xtr = env.Command(os.path.join(TOOLS, "ViennaRNA-2.4.14/configure"), 
                           RNAfold_dnwld, 
                           "tar xfz ${SOURCE} -C `dirname ${SOURCE}`")
-RNAfold_cfg = env.Command(os.path.join(TOOLS, "ViennaRNA-2.1.9/Makefile"), 
+RNAfold_cfg = env.Command(os.path.join(TOOLS, "ViennaRNA-2.4.14/Makefile"), 
                           RNAfold_xtr, 
                           "cd `dirname ${SOURCE}` && ./configure")
-RNAfold_make = env.Command(os.path.join(TOOLS, "ViennaRNA-2.1.9/Progs/RNAfold"), 
+RNAfold_make = env.Command(os.path.join(TOOLS, "ViennaRNA-2.4.14/src/bin//RNAfold"), 
                            RNAfold_cfg,
-                           "cd `dirname ${SOURCE}` && make")
+                           "cd `dirname ${SOURCE}` && make $( -j $CPUS $)")
 RNAfold_link = env.Command(os.path.join(BIN, "RNAfold"),
                            RNAfold_make, 
                            SymLink)
