@@ -107,7 +107,7 @@ Clean('.', signatures_dir)
 foldings_dir = 'folded_precursors'
 foldings_source = excised_precursors[2][0]
 foldings_target = 'precursors.folded'
-foldings_cmd = 'RNAfold --noPS < ${SOURCE} > ${TARGET}'
+foldings_cmd = 'RNAfold --noPS $( --jobs=$CPUS $) < ${SOURCE} > ${TARGET}'
 foldings = env.Command(os.path.join(foldings_dir,foldings_target), 
                        foldings_source, 
                        foldings_cmd)

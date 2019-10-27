@@ -33,7 +33,7 @@ mature_table = env.Command(mature_table_target,
                            mature_table_cmd)
 
 foldings_target = 'hairpin.species.folded'
-foldings_cmd = 'RNAfold --noPS < ${SOURCE} > ${TARGET}'
+foldings_cmd = 'RNAfold --noPS $( --jobs=$CPUS $) < ${SOURCE} > ${TARGET}'
 foldings = env.Command(foldings_target, 
                        [PRECURSORS_FASTA], 
                        foldings_cmd)
