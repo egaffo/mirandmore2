@@ -532,9 +532,16 @@ class PreSummary:
             ## if abs(mature_mid_point - midpoint(rna_)) <= 2 ...
             ## or it could also be a fraction of the mature length, f.i. 10%
             ## if abs(mature_mid_point - midpoint(rna_)) <= len(mature)/10 ...
-            if (mature_mid_point > rna_.start and mature_mid_point < rna_.end) \
-               and abs(rna_.start - mature.start) <= self.ALLOWED_OVERHANG \
-               and abs(rna_.end - mature.end) <= self.ALLOWED_OVERHANG:
+            ## NOTE: for future, setting the allowed overhang is a rule too
+            ## restrictive and may lead to rna_ packs not assigned because 
+            ## contiguos-overlapping reads can be packed together thus defining
+            ## a long rna_ pack/miR variant that would not be assigned even if 
+            ## very (if not the most) abundant! It is better to drop this
+            ## constraint here and handle later possible isomiRs.
+            #if (mature_mid_point > rna_.start and mature_mid_point < rna_.end) \
+            #   and abs(rna_.start - mature.start) <= self.ALLOWED_OVERHANG \
+            #   and abs(rna_.end - mature.end) <= self.ALLOWED_OVERHANG:
+            if (mature_mid_point > rna_.start and mature_mid_point < rna_.end):
                 if mature.order == "5p":
                     ## prevent the read pack trying to get an already assigned slot
                     if not self.five_prime_mir:
