@@ -25,7 +25,7 @@ target = env['SAMPLE'] + "_exact.blob"
 cmdLine = '''dump_exact_blob.py --mature-table $MATURE_TABLE '''\
           '''--threshold $MULTIPLE_GENOMIC_HITS_THRESHOLD '''\
           '''--genomic-hits ${SOURCES[1]} --output $TARGET --input ${SOURCES[0]} '''\
-          '''-c $MIN_COUNT'''
+          '''-c $MIN_COUNT -j $CPUS'''
 
 exact_blob = env.Command(target, 
                          [env['HAIRPIN_ALIGNMENTS'], env['GENOMIC_HITS_BLOB']], 
