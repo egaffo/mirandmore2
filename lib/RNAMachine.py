@@ -66,13 +66,16 @@ class RNA_from_reads:
             count = read[1]
             
             ## when the read starts and/or ends too far from the other reads
-            ## processed, do not add it to the read pack
+            ## processed, do not add it to the read pack, but push it
+            ## back into the stack so it will be re-evaluated for other packs
             if self.start and abs(start - self.running_start) > self.threshold \
-            and self.end and end > (self.running_end + self.threshold):
+               and self.end and end > (self.running_end + self.threshold):
+               #?and self.end and abs(end - self.running_end) > self.threshold:?
                 self.status = RNA_from_reads.DONE
                 self.reads.push(read)
                 break
             
+            ## start-a-new-pack signal
             if not self.start or start < self.start:
                 self.start = start
                 self.running_start = self.start
@@ -81,6 +84,7 @@ class RNA_from_reads:
                 self.end   = end
                 self.running_end = self.end
 
+            ## assign pack
             self.count += count
             self.running_start = start
             self.running_end = end
