@@ -160,10 +160,10 @@ if __name__ == '__main__':
     ## loop input and pass it to multiple processes
     ## while reading results as soon as they are computed
     for res in pool.imap(filter_n_split_read, 
-                             [(read,
+                             ((read,
                                args.min_base_qual, 
                                args.mean_quality, 
-                               args.max_length) for read in fastq_file], 
+                               args.max_length) for read in fastq_file), 
                              chunksize = 10000):
         if res[0] == 0:
             outfile.write('\n'.join(res[1]) + '\n')
