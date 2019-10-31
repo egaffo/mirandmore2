@@ -74,7 +74,7 @@ for sample,qresults in quantify_results.items():
                                        qresults['HAIRPIN_ALIGNMENTS_BLOB'][1].abspath + '"')
     ## MIRNA FILTER BY MULTIPLE GENOMIC MAPPINGS
     mirna_multi_gen_map_filter_list.append(sample + '="' + \
-                                           qresults['HAIRPIN_ALIGNMENTS_BLOB'][3].abspath + '"')
+                                           qresults['HAIRPIN_ALIGNMENTS_BLOB'][2].abspath + '"')
     ## PRECURSOR ASSIGNMENT ISSUES
     mirna_pre_ass_iss_list.append(sample + '="' + qresults['TABLES'][2].abspath + '"')
 

@@ -20,14 +20,14 @@ except NameError as ne:
     vars.Add('MULTIPLE_GENOMIC_HITS_THRESHOLD', '', '')
     vars.Add('MIN_COUNT', '', '')
     vars.Add('ALLOWED_OVERHANG', '', '')
-    vars.Add('ALLOWED_OVERHANG_MORNA', '', '')
-    vars.Add('EXACT', '', '')
-    vars.Add('SHORTER_OR_LONGER', '', '')
-    vars.Add('MIS_1', '', '')
-    vars.Add('MIS_2', '', '')
-    vars.Add('FIVE_PRIME', '', '')
-    vars.Add('THREE_PRIME', '', '')
-    vars.Add('MIN_MORNA_LEN', '', '')
+    #vars.Add('ALLOWED_OVERHANG_MORNA', '', '')
+    #vars.Add('EXACT', '', '')
+    #vars.Add('SHORTER_OR_LONGER', '', '')
+    #vars.Add('MIS_1', '', '')
+    #vars.Add('MIS_2', '', '')
+    #vars.Add('FIVE_PRIME', '', '')
+    #vars.Add('THREE_PRIME', '', '')
+    #vars.Add('MIN_MORNA_LEN', '', '')
     vars.Add('MATURE_TABLE', '', '')
     vars.Add('SAM', '', '')
     vars.Add('SERIALIZE_HAIRPIN_GENOMIC_HITS_BLOB', '', '')
@@ -42,23 +42,22 @@ except NameError as ne:
 
 pre_blob                = env['SAMPLE'] + "_pre.blob"
 stats                   = env['SAMPLE'] + "_stats.txt"
-matures_blob            = env['SAMPLE'] + "_matures.blob"
-multiple_hits_summary   = env['SAMPLE'] + "_multiple_hits_summary.txt"
+#matures_blob            = env['SAMPLE'] + "_matures.blob"
+unassigned_seqs_log   = env['SAMPLE'] + "_unassigned_seqs.log"
 
 targets = [pre_blob, 
            stats, 
-           matures_blob, 
-           multiple_hits_summary]
+           #matures_blob, 
+           unassigned_seqs_log]
 
-cmdLine = '''process_algn.py --mature-table $MATURE_TABLE --threshold '''\
-          '''$MULTIPLE_GENOMIC_HITS_THRESHOLD --genomic-hits ${SOURCES[1]} '''\
-          '''--input ${SOURCES[0]} -a $ALLOWED_OVERHANG -o $ALLOWED_OVERHANG_MORNA '''\
-          '''-e $EXACT -l $SHORTER_OR_LONGER -s $MIS_1 -S $MIS_2 '''\
-          '''-f $FIVE_PRIME -r $THREE_PRIME -c $MIN_COUNT '''\
-          '''-n $MIN_MORNA_LEN -b ${str(TARGETS[0].abspath).split("_pre.blob")[0]}'''
+cmdLine = '''process_algn.py $( -j $CPUS $) --mature-table $MATURE_TABLE '''\
+          '''--threshold $MULTIPLE_GENOMIC_HITS_THRESHOLD '''\
+          '''--genomic-hits ${SOURCES[1]} --input ${SOURCES[0]} '''\
+          '''-a $ALLOWED_OVERHANG -c $MIN_COUNT -u ${SOURCES[2]} '''\
+          '''-b ${str(TARGETS[0].abspath).split("_pre.blob")[0]}'''
 
 blobs =  env.Command(targets, 
-                     [env['SAM'], env['GENOMIC_HITS_BLOB']], 
+                     [env['SAM'], env['GENOMIC_HITS_BLOB'], env['UNIQUE_READS']], 
                      cmdLine)
 
 Return('blobs')

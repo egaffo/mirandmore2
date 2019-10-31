@@ -425,6 +425,7 @@ for sample in sorted(samples.keys()):
     env_quantify['SAMPLE'] = sample
     env_quantify['FILTERED_READS']  = results[sample]['filtered'][0]
     env_quantify['GENOMIC_HITS_BLOB'] = results[sample]['genomic_hits_blob']
+    env_quantify['UNIQUE_READS'] = results[sample]['collapsed']
 
     quantify_sample = SConscript(os.path.join(sample_dir,'quantify.py'),
                            src_dir = SCONSCRIPT_HOME,
