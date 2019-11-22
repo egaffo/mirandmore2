@@ -27,7 +27,7 @@ def main():
                     #try:
                     for seq, count in _d.items():
                         type_ = seq[3]
-                        sequence = seq[0]
+                        sequence = seq[0].decode()
                         start = str(seq[1])
                         end   = str(seq[2])
                         line = [str(pre_name), 
