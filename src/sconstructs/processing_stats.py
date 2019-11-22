@@ -83,12 +83,16 @@ mirna_seqtag_discarded = 'c(' + ','.join(mirna_seqtag_discarded_list) + ')'
 mirna_multi_gen_map_filter = 'c(' + ','.join(mirna_multi_gen_map_filter_list) + ')'
 mirna_pre_ass_iss= 'c(' + ','.join(mirna_pre_ass_iss_list) + ')'
 
-## NON-MIRNA ALIGNMENT STATS
-non_mirna_align_list = []
-for sample in results.keys():
-    non_mirna_align_list.append(sample + '="' + results[sample]['non_mirna']['ALIGNMENTS'][1].abspath + '"')
-
-non_mirna_align =  'c(' + ','.join(non_mirna_align_list) + ')' 
+non_mirna_align = 'NULL'
+if env['NON_MIRNAS']:
+    ## NON-MIRNA ALIGNMENT STATS
+    non_mirna_align_list = []
+    for sample in results.keys():
+        non_mirna_align_list.append(sample + '="' +\
+                                    results[sample]['non_mirna']['ALIGNMENTS'][1].abspath +\
+                                    '"')
+    
+    non_mirna_align =  'c(' + ','.join(non_mirna_align_list) + ')' 
 
 ### generate HTML result report ##
 ##report_summary_cmd = '''Rscript -e 'results.dir <- dirname("$TARGET.abspath"); '''\

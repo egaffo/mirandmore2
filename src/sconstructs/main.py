@@ -74,6 +74,9 @@ vars.Add('TRIMMER', 'The tool to use for trimming read adapter. '\
          'cutadapt')
 
 vars.Add('CUTADAPT_EXTRA_PARAMS', '', '')
+vars.Add('NON_MIRNAS', 
+         'Enable characterization of reads not aligned to miRNA precursors', 
+         False)
 
 
 env = Environment(ENV = os.environ,
@@ -84,6 +87,8 @@ Help(vars.GenerateHelpText(env))
 SCONSCRIPT_HOME = os.path.join(env['ENV']['MIRANDMORE_HOME'],'src','sconstructs')
 env['SCONSCRIPT_HOME'] = SCONSCRIPT_HOME
 env['MIRANDMORE_BIN'] = os.path.join(env['ENV']['MIRANDMORE_HOME'],'bin')
+
+env.SetDefault(NON_MIRNAS = False)
 
 env.Replace(GENOME =  File(env['GENOME']).abspath)
 if env['GENE_ANNOTATION'] != '':
@@ -237,23 +242,6 @@ for sample in sorted(samples.keys()):
     results[sample]['filtered'] = filtered
     Clean('.', filter_dir)
     
-    ## CHARACTERIZE THE READS DISCARDED FOR EXCESSIVE LENGTH:
-    ## 1. align to the whole genome; 
-    ## 2. intersect with the given annotation (if any)
-    #env_length_discarded = env.Clone()
-    #env_length_discarded['READS'] = filtered[2]
-    #env_length_discarded['SCONSCRIPT_HOME'] = SCONSCRIPT_HOME
-    #env_length_discarded['SAMPLE'] = sample
-    #env_length_discarded['ANNOTATION'] = env['GENE_ANNOTATION']
-    #env_length_discarded['BOWTIE_EXTRA_PARAMS'] = env['NM_BOWTIE_PARAMS'].split()
-    #length_discarded_dir = os.path.join(sample_dir, 'length_discarded_reads')
-    #length_discarded = SConscript(os.path.join(length_discarded_dir, 
-    #                                           'mirandmore_length_discarded.scons'),
-    #                      variant_dir = length_discarded_dir, 
-    #                      src_dir = SCONSCRIPT_HOME,
-    #                      duplicate = 0, exports = 'env_length_discarded')
-    #results[sample]['length_discarded'] = length_discarded
-    #Clean('.', length_discarded_dir)
     if env['TRIMMER'] == 'fastxtoolkit':
         results[sample]['length_discarded'] = filtered[2]
     else:
@@ -307,28 +295,6 @@ for sample in sorted(samples.keys()):
 Clean('.', mirandmore_dbs_dir)
 
 results_dir = 'results'
-
-## collect rescued long read counts
-#sample_file_str = []
-#gene_count_files = []
-#for sample in samples.keys():
-#    count_file = results[sample]['length_discarded']['GENE_COUNTS'][0]
-#    sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
-#    gene_count_files.append(count_file)
-#
-#gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
-#
-#collect_ld_gene_counts_cmd = '''Rscript -e " ''' + gene_count_vector +\
-#        '''; merged.gtf.counts.file <- '${TARGETS[0]}'; '''\
-#        '''count.matrix.file <- '${TARGETS[1]}'; '''\
-#        '''source(file.path('$MIRANDMORE_BIN', 'collect_ld_gene_counts.R')) " '''
-#
-#collect_ld_gene_counts_targets = [os.path.join(results_dir, f) for f in 
-#                                  ['lenght_disc_gene_counts.gtf.csv',
-#                                   'lenght_disc_gene_counts.csv']]
-#collect_ld_gene_counts = env.Command(collect_ld_gene_counts_targets,
-#                                     gene_count_files,
-#                                     collect_ld_gene_counts_cmd)
 
 ## Precursor predictions
 env['NEW_PREMIRS_MIRS_GFF'] = None
@@ -443,52 +409,54 @@ for sample in sorted(samples.keys()):
     quantify_results[sample] = quantify_sample[1]
     results[sample]['quantify'] = quantify_sample[0]
     
-    ## CHARACTERIZE THE READS DISCARDED FOR EXCESSIVE LENGTH AND NOT
-    ## ALIGNED TO MIRNA PRECURSORS:
-    ## 1. align to the whole genome; 
-    ## 2. intersect with the given annotation (if any)
-    env_non_mirna = env.Clone()
-    env_non_mirna['READS'] = [results[sample]['length_discarded'], 
-                              quantify_results[sample]['PRE_UNMAPPED']]
-    env_non_mirna['SCONSCRIPT_HOME'] = SCONSCRIPT_HOME
-    env_non_mirna['SAMPLE'] = sample
-    env_non_mirna['ANNOTATION'] = env['GENE_ANNOTATION']
-    env_non_mirna['BOWTIE_EXTRA_PARAMS'] = env['NM_BOWTIE_PARAMS'].split()
-    non_mirna_dir = os.path.join(sample_dir, 'non_mirnas')
-    non_mirna = SConscript(os.path.join(non_mirna_dir, 
-                                        'non_mirnas.py'),
-                          variant_dir = non_mirna_dir, 
-                          src_dir = SCONSCRIPT_HOME,
-                          duplicate = 0, exports = 'env_non_mirna')
-    results[sample]['non_mirna'] = non_mirna
-    Clean('.', non_mirna_dir)
+    if env['NON_MIRNAS']:
+        ## CHARACTERIZE THE READS DISCARDED FOR EXCESSIVE LENGTH AND NOT
+        ## ALIGNED TO MIRNA PRECURSORS:
+        ## 1. align to the whole genome; 
+        ## 2. intersect with the given annotation (if any)
+        env_non_mirna = env.Clone()
+        env_non_mirna['READS'] = [results[sample]['length_discarded'], 
+                                  quantify_results[sample]['PRE_UNMAPPED']]
+        env_non_mirna['SCONSCRIPT_HOME'] = SCONSCRIPT_HOME
+        env_non_mirna['SAMPLE'] = sample
+        env_non_mirna['ANNOTATION'] = env['GENE_ANNOTATION']
+        env_non_mirna['BOWTIE_EXTRA_PARAMS'] = env['NM_BOWTIE_PARAMS'].split()
+        non_mirna_dir = os.path.join(sample_dir, 'non_mirnas')
+        non_mirna = SConscript(os.path.join(non_mirna_dir, 
+                                            'non_mirnas.py'),
+                              variant_dir = non_mirna_dir, 
+                              src_dir = SCONSCRIPT_HOME,
+                              duplicate = 0, exports = 'env_non_mirna')
+        results[sample]['non_mirna'] = non_mirna
+        Clean('.', non_mirna_dir)
 
-## MERGE SAMPLES' NON-MIRNA COUNTS
-sample_file_str = []
-gene_count_files = []
-for sample in samples.keys():
-    count_file = results[sample]['non_mirna']['GENE_COUNTS']
-    if count_file:
-        count_file = count_file[0]
-        sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
-        gene_count_files.append(count_file)       
-    else:
-        sample_file_str.append("'" + sample + "' = 'None'")
-
-if len(gene_count_files) > 0:
-    gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
+if env['NON_MIRNAS']:
+    ## MERGE SAMPLES' NON-MIRNA COUNTS
+    sample_file_str = []
+    gene_count_files = []
+    for sample in samples.keys():
+        count_file = results[sample]['non_mirna']['GENE_COUNTS']
+        if count_file:
+            count_file = count_file[0]
+            sample_file_str.append("'" + sample + "' = '" + count_file.abspath + "'")
+            gene_count_files.append(count_file)       
+        else:
+            sample_file_str.append("'" + sample + "' = 'None'")
     
-    collect_gene_counts_cmd = '''Rscript -e " ''' + gene_count_vector +\
-            '''; merged.gtf.counts.file <- '${TARGETS[0]}'; '''\
-            '''count.matrix.file <- '${TARGETS[1]}'; '''\
-            '''source(file.path('$MIRANDMORE_BIN', 'collect_gene_counts.R')) " '''
-    
-    collect_gene_counts_targets = [os.path.join(results_dir, f) for f in 
-                                      ['non_mirna_gene_counts.gtf.csv',
-                                       'non_mirna_gene_counts.csv']]
-    collect_gene_counts = env.Command(collect_gene_counts_targets,
-                                         gene_count_files,
-                                         collect_gene_counts_cmd)
+    if len(gene_count_files) > 0:
+        gene_count_vector = "files <- c(" + ','.join(sample_file_str) + ")"
+        
+        collect_gene_counts_cmd = '''Rscript -e " ''' + gene_count_vector +\
+                '''; merged.gtf.counts.file <- '${TARGETS[0]}'; '''\
+                '''count.matrix.file <- '${TARGETS[1]}'; '''\
+                '''source(file.path('$MIRANDMORE_BIN', 'collect_gene_counts.R')) " '''
+        
+        collect_gene_counts_targets = [os.path.join(results_dir, f) for f in 
+                                          ['non_mirna_gene_counts.gtf.csv',
+                                           'non_mirna_gene_counts.csv']]
+        collect_gene_counts = env.Command(collect_gene_counts_targets,
+                                             gene_count_files,
+                                             collect_gene_counts_cmd)
 
 
 #read_quality_stats_dir = 'read_quality_stats'
