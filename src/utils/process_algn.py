@@ -524,16 +524,20 @@ class PProcessor():
             header = '\t'.join(['sequence', 'count', 'alignment_and_count'])
             out.write(header + '\n')
 
-            for seq in self.unassigned_seq.keys():
+            for seq, v in self.unassigned_seq.items():
                 positions = []
-                for pos, count in self.unassigned_seq[seq]['position'].items():
+                for pos, count in v['position'].items():
                     #nm = self.unassigned_seq[seq]['position'][pos]
                     #pos_with_nm = [str(tag) for tag in pos] + [str(nm)]
                     #positions.append(':'.join(pos_with_nm))
                     positions.append(':'.join([pos, str(count)]))
 
-                line = '\t'.join([str(seq.decode()), 
-                                  str(self.unassigned_seq[seq]['count']['count']),
+                try:
+                    seq_id = seq.decode()
+                except (UnicodeDecodeError, AttributeError):
+                    seq_id = seq
+                line = '\t'.join([seq_id, 
+                                  str(v['count']['count']),
                                   '|'.join(positions)])
 
                 out.write(line + '\n')
