@@ -59,7 +59,7 @@ vars.Add('BOWTIE_GENOME_INDEX', 'The path and name of an already computed Bowtie
 	 'Setting this parameter will skip the (long) generation of the index', '')
 
 ## workflow logic
-vars.Add('PREDICT_NOVEL_PREMIRS', 'Wether to enable novel precursor prediction', 'True')
+vars.Add('PREDICT_NOVEL_PREMIRS', 'Wether to enable novel precursor prediction', 'False')
 
 vars.Add('GENE_ANNOTATION', 'Gene annotation GTF file to characterize '\
          'non-miRNA reads. Leave empty to only map length discarded reads', '')
@@ -242,8 +242,8 @@ for sample in sorted(samples.keys()):
     results[sample]['filtered'] = filtered
     Clean('.', filter_dir)
     
-    if env['TRIMMER'] == 'fastxtoolkit':
-        results[sample]['length_discarded'] = filtered[2]
+    if env['TRIMMER'] == 'fastxtoolkit' or env['NOADAPTER']:
+        results[sample]['length_discarded'] = filtered[0]
     else:
         results[sample]['length_discarded'] = trimmed[2]
     
