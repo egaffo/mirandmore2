@@ -22,7 +22,7 @@ mirandmore_serialize_alignments = 'serialize_alignments.py'
 mirandmore_do_exact_blob        = 'do_exact_blob.py'
 mirandmore_do_cooked_blob       = 'do_cooked_blob.py'
 mirandmore_do_tables            = 'do_tables.py'
-mirandmore_extract_seq_of_novel_rnas = 'extract_seq_of_novel_rnas.py'
+#mirandmore_extract_seq_of_novel_rnas = 'extract_seq_of_novel_rnas.py'
 mirandmore_spit_unfiltered_variants  = 'spit_unfiltered_variants.py'
 
 results = []
@@ -140,19 +140,19 @@ results.append(tables)
 Clean('.', table_dir)
 
 ## GET NUCLEOTIDE SEQUENCES OF THE NEW SMALL RNAS
-sequences_dir = 'sequences'
-
-env_extract_seq_of_novel_rnas = env.Clone()
-env_extract_seq_of_novel_rnas['MIR_TABLE'] = tables[0]
-novel_seqs = SConscript(os.path.join(sequences_dir, mirandmore_extract_seq_of_novel_rnas),
-                        variant_dir = sequences_dir, 
-                        src_dir = SRC_DIR,
-                        duplicate = 0, 
-                        exports = '''env_extract_seq_of_novel_rnas ''')
-
-results.append(novel_seqs)
-results_dict['NOVEL_SEQS'] = novel_seqs
-Clean('.', sequences_dir)
+#sequences_dir = 'sequences'
+#
+#env_extract_seq_of_novel_rnas = env.Clone()
+#env_extract_seq_of_novel_rnas['MIR_TABLE'] = tables[0]
+#novel_seqs = SConscript(os.path.join(sequences_dir, mirandmore_extract_seq_of_novel_rnas),
+#                        variant_dir = sequences_dir, 
+#                        src_dir = SRC_DIR,
+#                        duplicate = 0, 
+#                        exports = '''env_extract_seq_of_novel_rnas ''')
+#
+#results.append(novel_seqs)
+#results_dict['NOVEL_SEQS'] = novel_seqs
+#Clean('.', sequences_dir)
 
 ##############################
 ## Include moRNAs and new sister miRNAs in unfiltered variants:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, re, argparse
+from collections import defaultdict
 
 ## Parse a GFF3 file and produce a table of mature miRNAs with miRNA coordinates within their
 ## precursor.
@@ -91,6 +92,81 @@ def gff2maturetable(target, source, env):
         sys.exit('''Non GFF v3 format not yet supported. Please use a valid GFF3 file.'''\
                  '''If you are sure a valid GFF3 has been passed try to rename with .gff3''')
 
+
+
+def get_field_value(field_list, field):
+    
+    val = None
+    for f in field_list:
+        if field in f:
+            val = re.sub('.*=(.*)', r'\1', f)
+            break
+
+    return val
+
+
+def maturetable2gff(mature_table, gff, prefix):
+    
+    precursors_pos = defaultdict(dict)
+
+    with open(gff, 'r') as gff_features:
+        for feature in gff_features:
+            
+            ## populate reference GFF features
+            f = feature.strip().split('\t')
+            chrom = f[0].strip()
+            start = f[3].strip()
+            end   = f[4].strip()
+            strand= f[6].strip()
+            #name  = re.sub('.*Name=([^;]);*', r'\1', f[8]).strip()
+            name  = get_field_value(f[8].strip().split(';'), 'Name')
+            ID    = get_field_value(f[8].strip().split(';'), 'ID')
+
+            precursors_pos[name] = {'chrom': chrom,
+                                    'start': start,
+                                    'end':   end,
+                                    'strand':strand,
+                                    'ID':   ID,
+                                    'gffline_list': f}
+
+    with open(mature_table, 'r') as mt:
+        for line in mt:
+            l = line.strip().split('\t')
+            #chrom = l[0].strip()
+            start = l[4].strip()
+            end   = l[5].strip()
+            #strand= l[3].strip()
+            name  = l[2].strip()
+            pre   = l[1].strip()
+
+            if name in precursors_pos.keys():
+                outline_list = precursors_pos[name]['gffline_list']
+
+            else:
+                gen_start = int(precursors_pos[pre]['start']) + int(start) - 1
+                gen_end   = int(precursors_pos[pre]['start']) + int(end) - 1
+                gen_chrom = re.sub(prefix, '', precursors_pos[pre]['chrom'])
+                gen_strand= precursors_pos[pre]['strand']
+                gen_ID    = precursors_pos[pre]['ID']
+                featuretype = 'moRNA' if 'moR' in name else 'miRNA_loop' if 'loop' in name else 'miRNA'
+
+                outline_list = [gen_chrom, 
+                                '.', 
+                                featuretype,
+                                str(gen_start),
+                                str(gen_end),
+                                '.',
+                                gen_strand,
+                                '.',
+                                ';'.join(['ID='+name, 
+                                          'Alias='+name,
+                                          'Name='+name,
+                                          'Derives_from='+gen_ID])]
+
+            print('\t'.join(outline_list))
+
+            
+
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -109,11 +185,26 @@ if __name__ == '__main__':
                                '''This is useful when you use a genome and annotation with '''\
                                '''different standards, like Ensembl genome and miRBase'''\
                                '''annotation''', 
-                        default = 'chr')
+                        default = '')
+    parser.add_argument('-r', '--reverse',
+                        dest = 'reverse', 
+                        required = False,
+                        action = 'store_true',
+                        help = '''Reverse the conversion: from a mature-table.txt '''\
+                               '''formatted file return a GFF with the genomic '''\
+                               '''coordinates. The original GFF is required '''\
+                               '''since it bears the genomic coordinates of '''\
+                               '''each precursor. This is useful to get genomic '''\
+                               '''coordinates of newly predicte RNAs, such as moRNAs. '''\
+                               '''Output will be to stdout''')
+
     args = parser.parse_args()
 
     env = {'CHRM_PREFIX':args.chrmprefix}
 
-    gff2maturetable([args.mature_table], [args.gff], env)
+    if args.reverse:
+        maturetable2gff(args.mature_table, args.gff, args.chrmprefix)
+    else:
+        gff2maturetable([args.mature_table], [args.gff], env)
 
 
