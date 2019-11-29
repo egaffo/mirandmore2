@@ -93,7 +93,8 @@ def gff2maturetable(target, source, env):
                  '''If you are sure a valid GFF3 has been passed try to rename with .gff3''')
 
 
-
+## From a list of GFF3 tagged vales, extract the value of
+## the specified key
 def get_field_value(field_list, field):
     
     val = None
@@ -104,7 +105,10 @@ def get_field_value(field_list, field):
 
     return val
 
-
+## Given a mature-table.txt like input, together with the 
+## original GFF3 file from which it was generated, return 
+## to stdout a GFF3 with the novel features (i.e. precursors,
+## sister miRNAs, moRNAs and loops) genomic coordinates
 def maturetable2gff(mature_table, gff, prefix):
     
     precursors_pos = defaultdict(dict)
