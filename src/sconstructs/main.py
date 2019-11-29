@@ -513,12 +513,38 @@ summary_tables = SConscript(os.path.join(results_dir, 'summarize_tables.py'),
 
 #env['NORMALIZED_DATA'] = summary_tables[1]
 
+## COMPUTE AND SAVE SRNA GENOMIC COORDINATES,
+## INCLUDING NOVEL ONES
+results_gff_sources = [summary_tables[1],  
+                       mirandmore_annotation[1][0]] 
+#'raw_variants.txt','hairpin.extended.gff3'
+
+results_gff_cmd = '''grep -v "^pre" ${SOURCES[0]} | '''\
+                  '''cut -f1,2,4,5 -d";" | '''\
+                  '''squish_srnas.py -i - | '''\
+                  '''gff2maturetable.py -r -g ${SOURCES[1]} -m - | '''\
+                  '''sort | uniq | sort -k1,1 -k4,4n > ${TARGETS[0]}'''
+results_gff = env.Command(os.path.join(results_dir, 'mnm2_sRNA.gff3'),
+                          results_gff_sources,
+                          results_gff_cmd)
+
+
+## RETRIEVE SRNA SEQUENCES
+get_sequences_cmd = '''gff32bed.py ${SOURCES[0]} | '''\
+                    '''bedtools getfasta -fi $GENOME '''\
+                    '''-bed - -s -name+ -tab | '''\
+                    '''sed "s_()__" > ${TARGET}'''
+get_sequences = env.Command(os.path.join(results_dir, 'mnm2_sRNA.sequences'),
+                            results_gff[0],
+                            get_sequences_cmd)
+
+
 ## COLLECT NOVEL PREDICTIONS
-env_new_stuff = env.Clone()
-new_stuff = SConscript(os.path.join(results_dir,'new_stuff.py'),
-                       src_dir = SCONSCRIPT_HOME,
-                       variant_dir = results_dir, duplicate = 0,
-                       exports = '''env_new_stuff ''')
+#env_new_stuff = env.Clone()
+#new_stuff = SConscript(os.path.join(results_dir,'new_stuff.py'),
+#                       src_dir = SCONSCRIPT_HOME,
+#                       variant_dir = results_dir, duplicate = 0,
+#                       exports = '''env_new_stuff ''')
 
 ### generate HTML with miRNA and miRNA-like expression report
 #report_summary_cmd = '''Rscript -e 'results.dir <- dirname("$TARGET.abspath"); '''\
