@@ -133,43 +133,48 @@ def maturetable2gff(mature_table, gff, prefix):
                                     'ID':   ID,
                                     'gffline_list': f}
 
-    with open(mature_table, 'r') as mt:
-        for line in mt:
-            l = line.strip().split('\t')
-            #chrom = l[0].strip()
-            start = l[4].strip()
-            end   = l[5].strip()
-            #strand= l[3].strip()
-            name  = l[2].strip()
-            pre   = l[1].strip()
+    if mature_table is '-':
+        mt = sys.stdin
+    else:
+        mt = open(mature_table, 'r')
 
-            if name in precursors_pos.keys():
-                outline_list = precursors_pos[name]['gffline_list']
+    for line in mt:
+        l = line.strip().split('\t')
+        #chrom = l[0].strip()
+        start = l[4].strip()
+        end   = l[5].strip()
+        #strand= l[3].strip()
+        name  = l[2].strip()
+        pre   = l[1].strip()
 
-            else:
-                gen_start = int(precursors_pos[pre]['start']) + int(start) - 1
-                gen_end   = int(precursors_pos[pre]['start']) + int(end) - 1
-                gen_chrom = re.sub(prefix, '', precursors_pos[pre]['chrom'])
-                gen_strand= precursors_pos[pre]['strand']
-                gen_ID    = precursors_pos[pre]['ID']
-                featuretype = 'moRNA' if 'moR' in name else 'miRNA_loop' if 'loop' in name else 'miRNA'
+        if name in precursors_pos.keys():
+            outline_list = precursors_pos[name]['gffline_list']
 
-                outline_list = [gen_chrom, 
-                                '.', 
-                                featuretype,
-                                str(gen_start),
-                                str(gen_end),
-                                '.',
-                                gen_strand,
-                                '.',
-                                ';'.join(['ID='+name, 
-                                          'Alias='+name,
-                                          'Name='+name,
-                                          'Derives_from='+gen_ID])]
+        else:
+            gen_start = int(precursors_pos[pre]['start']) + int(start) - 1
+            gen_end   = int(precursors_pos[pre]['start']) + int(end) - 1
+            gen_chrom = re.sub(prefix, '', precursors_pos[pre]['chrom'])
+            gen_strand= precursors_pos[pre]['strand']
+            gen_ID    = precursors_pos[pre]['ID']
+            featuretype = 'moRNA' if 'moR' in name else 'miRNA_loop' if 'loop' in name else 'miRNA'
 
-            print('\t'.join(outline_list))
+            outline_list = [gen_chrom, 
+                            '.', 
+                            featuretype,
+                            str(gen_start),
+                            str(gen_end),
+                            '.',
+                            gen_strand,
+                            '.',
+                            ';'.join(['ID='+name, 
+                                      'Alias='+name,
+                                      'Name='+name,
+                                      'Derives_from='+gen_ID])]
 
-            
+        print('\t'.join(outline_list))
+
+    mt.close()
+
 
 if __name__ == '__main__':
     
@@ -200,7 +205,8 @@ if __name__ == '__main__':
                                '''since it bears the genomic coordinates of '''\
                                '''each precursor. This is useful to get genomic '''\
                                '''coordinates of newly predicte RNAs, such as moRNAs. '''\
-                               '''Output will be to stdout''')
+                               '''Output will be to stdout. Read mature table '''\
+                               '''from stdin by setting - as file.''')
 
     args = parser.parse_args()
 
