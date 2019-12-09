@@ -58,15 +58,15 @@ def gff2maturetable(target, source, env):
                             ## we assume that the GFF specifies first the precursor
                             ## and then the relative miRNAs. Or, at least, all the
                             ## precursors first and then all the miRNAs
-                            prename      = pre_id2names[mirna_pre_id]['name']
-                            pre_start    = pre_id2names[mirna_pre_id]['start']
-                            pre_end      = pre_id2names[mirna_pre_id]['end']
+                            prename   = pre_id2names[mirna_pre_id]['name']
+                            pre_start = pre_id2names[mirna_pre_id]['start']
+                            pre_end   = pre_id2names[mirna_pre_id]['end']
                             mir_in_pre_start = start - pre_start + 1
                             mir_in_pre_end   = end - pre_start + 1
                             if strand == '-':
-                                mir_in_pre_start   = pre_end - end + 1
-                                mir_in_pre_end     = pre_end - start + 1
-                            pre_length       = pre_end - pre_start + 1
+                                mir_in_pre_start = pre_end - end + 1
+                                mir_in_pre_end   = pre_end - start + 1
+                            pre_length = pre_end - pre_start + 1
                             table_lines.append([chromosome,
                                                 prename,
                                                 name,
@@ -143,18 +143,24 @@ def maturetable2gff(mature_table, gff, prefix):
         #chrom = l[0].strip()
         start = l[4].strip()
         end   = l[5].strip()
-        #strand= l[3].strip()
         name  = l[2].strip()
         pre   = l[1].strip()
+        #strand= l[3].strip()
+        strand = precursors_pos[pre]['strand']
 
         if name in precursors_pos.keys():
             outline_list = precursors_pos[name]['gffline_list']
 
         else:
-            gen_start = int(precursors_pos[pre]['start']) + int(start) - 1
-            gen_end   = int(precursors_pos[pre]['start']) + int(end) - 1
+            if strand == '-':
+                gen_start = int(precursors_pos[pre]['end']) - int(end) + 1
+                gen_end   = int(precursors_pos[pre]['end']) - int(start) + 1
+            else:
+                gen_start = int(precursors_pos[pre]['start']) + int(start) - 1
+                gen_end   = int(precursors_pos[pre]['start']) + int(end) - 1
+
             gen_chrom = re.sub(prefix, '', precursors_pos[pre]['chrom'])
-            gen_strand= precursors_pos[pre]['strand']
+            gen_strand= strand #precursors_pos[pre]['strand']
             gen_ID    = precursors_pos[pre]['ID']
             featuretype = 'moRNA' if 'moR' in name else 'miRNA_loop' if 'loop' in name else 'miRNA'
 
@@ -171,6 +177,7 @@ def maturetable2gff(mature_table, gff, prefix):
                                       'Name='+name,
                                       'Derives_from='+gen_ID])]
 
+        outline_list[0] = outline_list[0].replace(prefix, '')
         print('\t'.join(outline_list))
 
     mt.close()
