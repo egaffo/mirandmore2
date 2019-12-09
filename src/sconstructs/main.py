@@ -520,7 +520,7 @@ results_gff_sources = [summary_tables[1],
 #'raw_variants.txt','hairpin.extended.gff3'
 
 results_gff_cmd = '''grep -v "^pre" ${SOURCES[0]} | '''\
-                  '''cut -f1,2,4,5 -d";" | '''\
+                  '''cut -f1,2,4,5 | '''\
                   '''squish_srnas.py -i - | '''\
                   '''gff2maturetable.py -r -g ${SOURCES[1]} -m - | '''\
                   '''sort | uniq | sort -k1,1 -k4,4n > ${TARGETS[0]}'''

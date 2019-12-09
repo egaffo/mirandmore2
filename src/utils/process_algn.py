@@ -148,7 +148,7 @@ class Processor(Filter):
                                 if result[3] == pre_name:
                                     previous_assignments.append(result)
 
-                        if  is_mismatch_1_mirna(alnmt, mature):
+                        if is_mismatch_1_mirna(alnmt, mature):
                             if was_assigned:
                                 sys.stderr.write("WARNING: alignment " + \
                                                  str(alnmt) + \
