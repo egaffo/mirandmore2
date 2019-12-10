@@ -495,6 +495,7 @@ class PreSummary:
         self.SISTER_OVERHANG_LEN = SISTER_OVERHANG_LEN
         self.SISTER_MATCHES_THRESHOLD = SISTER_MATCHES_THRESHOLD
         self.ALLOWED_OVERHANG = ALLOWED_OVERHANG
+        self.new_sister = None
 
 
     def __repr__(self):
@@ -567,8 +568,10 @@ class PreSummary:
                                             self.SISTER_MATCHES_THRESHOLD):
                 if mature.order == "5p":
                     self.three_prime_mir = rna_
+                    self.new_sister = '3p'
                 else:
                     self.five_prime_mir  = rna_
+                    self.new_sister = '5p'
                 try:
                     rna_.name = name_of_sister(self.name, mature)
                 except NamingError as ne:
@@ -631,7 +634,7 @@ class PreSummary:
                     return True
             
             ## check now the case of moRs adjacent to new sister miRs
-            if self.any_mature_assigned():
+            if self.any_mature_assigned() and self.new_sister:
                 if self.five_prime_mir and rna_.end < midpoint(self.five_prime_mir):
                     self.five_prime_mor = rna_
                     rna_.name = name_of_mor(self.name, '-5p')
