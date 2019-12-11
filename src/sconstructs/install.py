@@ -141,7 +141,7 @@ lnk_graph = env.Command(os.path.join(BIN,"fastq_quality_boxplot_graph.sh"),
                         SymLink)
 
 ## FASTQC
-FASTQC_zip = 'fastqc_v0.11.5.zip'
+FASTQC_zip = 'fastqc_v0.11.8.zip'
 FASTQC_link = 'http://www.bioinformatics.babraham.ac.uk/projects/fastqc/' + FASTQC_zip
 FASTQC_target = [os.path.join(TOOLS, FASTQC_zip),
                  os.path.join(TOOLS, 'FastQC', 'fastqc')] 
