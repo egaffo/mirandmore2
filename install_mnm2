@@ -8,6 +8,7 @@ export TOOL_DIR=$MIRANDMORE_HOME/tools
 export R_LIBS=$TOOLS_DIR/R_libs
 
 mkdir -p $TOOL_DIR ;
+mkdir -p $MIRANDMORE_HOME/bin
 
 ## check whether Scons is installed and install it if not
 command -v scons >/dev/null 2>&1 ||\
@@ -19,8 +20,6 @@ mkdir -p $TOOL_DIR/scons ;
 tar -xf $TOOL_DIR/scons-local-2.5.1.tar.gz -C $TOOL_DIR/scons ; 
 
 ln -s $TOOL_DIR/scons/scons.py $MIRANDMORE_HOME/bin/scons ; }
-
-mkdir -p $MIRANDMORE_HOME/bin
 
 cd $MIRANDMORE_HOME/bin
 ln -s ../src/utils/* .
