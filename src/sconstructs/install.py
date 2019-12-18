@@ -110,35 +110,68 @@ BOWTIE_BUILD_link = env.Command(os.path.join(BIN,"bowtie-build"),
                                 SymLink)
 
 ## fastx_toolkit and its dependencies
-dwld_gtext = env.Command(os.path.join(TOOLS, "libgtextutils-0.7.tar.gz"), 
-                        Uri("http://github.com/agordon/libgtextutils/releases/download/0.7/libgtextutils-0.7.tar.gz"), 
-                        "wget -q ${SOURCE} -O ${TARGET}")
-xtr_gtext  = env.Command(os.path.join(TOOLS, "libgtextutils-0.7/configure"), 
-                        [dwld_gtext], 
-                        "tar xf ${SOURCE} -C `dirname ${SOURCE}`")
-cmpl_gtext = env.Command(os.path.join(TOOLS, "libgtextutils-0.7/libtool"), 
-                        [xtr_gtext], 
-                        "cd `dirname ${SOURCE}`; ./configure --prefix=`pwd`; make && make install; cd ..")
-dwld_fastx = env.Command(os.path.join(TOOLS, "fastx_toolkit-0.0.14.tar.bz2"), 
-                        [cmpl_gtext, 
-                         Uri("http://github.com/agordon/fastx_toolkit/releases/download/0.0.14/fastx_toolkit-0.0.14.tar.bz2")],
-                         "wget -q ${SOURCES[1]} -O ${TARGET}")
-xtr_fastx  = env.Command(os.path.join(TOOLS, "fastx_toolkit-0.0.14/configure"),
-                        [dwld_fastx], 
-                        "tar xfj ${SOURCE} --transform 's/bin/fastx/g' --show-transformed-names -C `dirname ${SOURCE}`")
-pkg_config_path = os.path.join(TOOLS, "/libgtextutils-0.7/lib/pkgconfig:$PKG_CONFIG_PATH")
-cpml_fastx = env.Command([os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastx_clipper"), 
-                          os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastx_quality_stats"), 
-                          os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastq_quality_boxplot_graph.sh")], 
-                         os.path.join(TOOLS, "fastx_toolkit-0.0.14/configure"), 
-                         "cd `dirname ${SOURCE}`; ./configure --prefix=`pwd` PKG_CONFIG_PATH=" +\
-                         pkg_config_path + "; make && make install")
+#dwld_gtext = env.Command(os.path.join(TOOLS, "libgtextutils-0.7.tar.gz"), 
+#                        Uri("http://github.com/agordon/libgtextutils/releases/download/0.7/libgtextutils-0.7.tar.gz"), 
+#                        "wget -q ${SOURCE} -O ${TARGET}")
+#xtr_gtext  = env.Command(os.path.join(TOOLS, "libgtextutils-0.7/configure"), 
+#                        [dwld_gtext], 
+#                        "tar xf ${SOURCE} -C `dirname ${SOURCE}`")
+#cmpl_gtext = env.Command(os.path.join(TOOLS, "libgtextutils-0.7/libtool"), 
+#                        [xtr_gtext], 
+#                        "cd `dirname ${SOURCE}`; ./configure --prefix=`pwd`; make && make install; cd ..")
+#dwld_fastx = env.Command(os.path.join(TOOLS, "fastx_toolkit-0.0.14.tar.bz2"), 
+#                        [cmpl_gtext, 
+#                         Uri("http://github.com/agordon/fastx_toolkit/releases/download/0.0.14/fastx_toolkit-0.0.14.tar.bz2")],
+#                         "wget -q ${SOURCES[1]} -O ${TARGET}")
+#xtr_fastx  = env.Command(os.path.join(TOOLS, "fastx_toolkit-0.0.14/configure"),
+#                        [dwld_fastx], 
+#                        "tar xfj ${SOURCE} --transform 's/bin/fastx/g' --show-transformed-names -C `dirname ${SOURCE}`")
+#pkg_config_path = os.path.join(TOOLS, "/libgtextutils-0.7/lib/pkgconfig:$PKG_CONFIG_PATH")
+#cpml_fastx = env.Command([os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastx_clipper"), 
+#                          os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastx_quality_stats"), 
+#                          os.path.join(TOOLS, "fastx_toolkit-0.0.14/bin/fastq_quality_boxplot_graph.sh")], 
+#                         os.path.join(TOOLS, "fastx_toolkit-0.0.14/configure"), 
+#                         "cd `dirname ${SOURCE}`; ./configure --prefix=`pwd` PKG_CONFIG_PATH=" +\
+#                         pkg_config_path + "; make && make install")
+#
+#lnk_clipper = env.Command(os.path.join(BIN,"fastx_clipper"), [cpml_fastx[0]], SymLink)
+#lnk_stats = env.Command(os.path.join(BIN,"fastx_quality_stats"), [cpml_fastx[1]], SymLink)
+#lnk_graph = env.Command(os.path.join(BIN,"fastq_quality_boxplot_graph.sh"), 
+#                        [cpml_fastx[2]], 
+#                        SymLink)
+# FASTX-TOOLKIT
+libgtextutils_tar   = 'libgtextutils-0.7.tar.gz'
+libgtextutils_link  = 'https://github.com/agordon/libgtextutils/releases/download/0.7/' +\
+                     libgtextutils_tar
+libgtextutils_dir   = os.path.join(TOOLS, 'libgtextutils-0.7')
+libgtextutils_target = [os.path.join(TOOLS, libgtextutils_tar), 
+                        os.path.join(libgtextutils_dir, 'lib', 'libgtextutils.so'),
+                        os.path.join(libgtextutils_dir, 'lib', 'pkgconfig', 'gtextutils.pc')]
+libgtextutils = env.Command(libgtextutils_target, [], 
+                            ['wget -O $TARGET ' + libgtextutils_link, 
+                            'tar -xf ${TARGETS[0]} -C ${TARGETS[0].dir}', 
+                            'cd ' + libgtextutils_dir + ' && ./configure --prefix=`pwd`'\
+                            ' && make && make install',
+                            'cd ' + Dir('#').abspath])
 
-lnk_clipper = env.Command(os.path.join(BIN,"fastx_clipper"), [cpml_fastx[0]], SymLink)
-lnk_stats = env.Command(os.path.join(BIN,"fastx_quality_stats"), [cpml_fastx[1]], SymLink)
-lnk_graph = env.Command(os.path.join(BIN,"fastq_quality_boxplot_graph.sh"), 
-                        [cpml_fastx[2]], 
-                        SymLink)
+libgtextutils_config_path = os.path.dirname(libgtextutils[2].abspath)
+
+FASTXTOOLKIT_tar = 'fastx_toolkit-0.0.14.tar.bz2'
+FASTXTOOLKIT_link = 'https://github.com/agordon/fastx_toolkit/releases/download/0.0.14/' +\
+                    FASTXTOOLKIT_tar
+FASTXTOOLKIT_dir = os.path.join(tools_dir, 'fastx_toolkit-0.0.14')
+FASTXTOOLKIT_target = [os.path.join(tools_dir, FASTXTOOLKIT_tar),
+                       os.path.join(FASTXTOOLKIT_dir, 'bin', 'fastx_quality_stats')]
+FASTXTOOLKIT = env.Command(FASTXTOOLKIT_target, [Value(libgtextutils_config_path), libgtextutils[2]], 
+                           ['wget -O $TARGET ' + FASTXTOOLKIT_link,
+                            'tar -xf ${TARGETS[0]} -C ${TARGETS[0].dir}',
+                            'cd ' + FASTXTOOLKIT_dir + ' && ./configure --prefix=' +\
+                            FASTXTOOLKIT_dir + ' PKG_CONFIG_PATH=${SOURCES[0]}'\
+                            ':$$PKG_CONFIG_PATH '\
+                            ' && make && make install', 
+                            'cd ' + Dir('#').abspath])
+env.Command(os.path.join(BIN, "${SOURCE.file}"), FASTXTOOLKIT[1], SymLink)
+
 
 ## FASTQC
 FASTQC_zip = 'fastqc_v0.11.8.zip'
