@@ -21,10 +21,21 @@ import os
 
 Import('*')
 
+def SymLink(target, source, env):
+    try:
+        os.symlink(os.path.abspath(str(source[0])), 
+                   os.path.abspath(str(target[0])))
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            os.remove(os.path.abspath(str(target[0])))
+            os.symlink(os.path.abspath(str(source[0])), 
+                       os.path.abspath(str(target[0])))
+    return None
+
 try:
     env = env_bowtie_index.Clone()
     #fasta_to_index = bowtie_index_FASTA_TO_INDEX
-except NameError, ne:
+except NameError as ne:
     print ne
     vars = Variables('vars.py')
     vars.Add('FASTA_TO_INDEX', 'The fasta file to be indexed.', 'fasta')
@@ -52,9 +63,6 @@ CmdLine = 'bowtie-build -r -f ${SOURCE} ' + \
 indexes = env.Command(targets, 
                       env['FASTA_TO_INDEX'], #fasta_to_index, 
                       CmdLine)
-
-def SymLink(target, source, env):
-    os.symlink(os.path.abspath(str(source[0])), os.path.abspath(str(target[0])))
 
 fasta_smlnk = env.Command('${SOURCE.file}', 
                           env['FASTA_TO_INDEX'], #fasta_to_index, 
