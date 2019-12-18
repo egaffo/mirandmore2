@@ -5,7 +5,7 @@ def SymLink(target, source, env):
     try:
         os.symlink(os.path.abspath(str(source[0])), 
                    os.path.abspath(str(target[0])))
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             os.remove(os.path.abspath(str(target[0])))
             os.symlink(os.path.abspath(str(source[0])), 

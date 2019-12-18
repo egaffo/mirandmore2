@@ -1,11 +1,11 @@
 from datetime import datetime
-import urllib2
+import urllib, urllib.request
 import time
 import re
 import SCons.Node
 import os.path
 from ftplib import FTP
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 MDTM_OK = "213"
@@ -108,8 +108,8 @@ class Uri(SCons.Node.Python.Value):
         return self.value.split("://")[0]
 
     def get_http_sig(self):
-        request = urllib2.Request(self.value)
-        opener  = urllib2.build_opener()
+        request = urllib.request.Request(self.value)
+        opener  = urllib.request.build_opener()
         response = opener.open(request)
         try:
             return response.headers.get("etag").replace('"','')
