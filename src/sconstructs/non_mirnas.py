@@ -10,7 +10,7 @@ Import('*')
 
 try:
     env = env_non_mirna.Clone()
-except NameError, ne:
+except NameError as ne:
     vars = Variables('vars.py')
     vars.Add('QUALITY_ENCODING', 'FASTQ encoding', 'phred')
     vars.Add('SAMPLE', 'Prefix name for results', '')
@@ -28,7 +28,7 @@ except NameError, ne:
     Help(vars.GenerateHelpText(env))
     unknown = vars.UnknownVariables()
     if unknown:
-        print "Unknown variables:", unknown.keys()
+        print("Unknown variables:", list(unknown.keys()))
         Exit(1)
 
 ## ALIGN CLEAN READS TO REFERENCE GENOME

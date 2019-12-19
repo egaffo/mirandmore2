@@ -32,7 +32,7 @@ except NameError:
     Help(vars.GenerateHelpText(env))
     unknown = vars.UnknownVariables()
     if unknown:
-        print "Unknown variables:", unknown.keys()
+        print("Unknown variables:", list(unknown.keys()))
         Exit(1)
 
 # FASTQC removes .gz, .fq, .fastq extensions (also recursively) from the input file name

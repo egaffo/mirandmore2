@@ -30,7 +30,7 @@ mirandmore_mirdeep2_predictions ='mirdeep2_predictions.py'
 results = env['PREPROCESSING_FILES']
 
 # pool the collapsed reads from all samples
-pooling_source = [results[f]['collapsed'][0] for f in results.keys()] # all the unique read files
+pooling_source = [results[f]['collapsed'][0] for f in list(results.keys())] # all the unique read files
 pooling_target = 'pooled_uniques.fa'
 catenate_collapsed_cmd = 'cat ${SOURCES} > ${TARGET}' 
 pooled_collapsed = env.Command(os.path.join(mirandmore_mirdeep2_dir, pooling_target), 
@@ -39,7 +39,7 @@ pooled_collapsed = env.Command(os.path.join(mirandmore_mirdeep2_dir, pooling_tar
 mirdeep2_predictions.append(pooled_collapsed)
 
 # pool the genomic alignments from all samples
-pooling_source = [results[f]['aligned_uniques'][0] for f in results.keys()] # all the genomic alignments files
+pooling_source = [results[f]['aligned_uniques'][0] for f in list(results.keys())] # all the genomic alignments files
 pooling_target = 'pooled_genomic.out'
 catenate_genomic_out_cmd = 'cat ${SOURCES} > ${TARGET}' 
 pooled_aligned_uniques = env.Command(os.path.join(mirandmore_mirdeep2_dir, pooling_target), 

@@ -4,7 +4,7 @@ Import('*')
 
 try:
     env = env_bowtie.Clone()
-except NameError, ne:
+except NameError as ne:
     vars = Variables('vars.py')
     vars.Add('CPUS', 'Max parallel jobs to execute', '4')
     vars.Add('BOWTIE_INDEX', 'The Bowtie index', '')
@@ -17,7 +17,7 @@ except NameError, ne:
     Help(vars.GenerateHelpText(env))
     unknown = vars.UnknownVariables()
     if unknown:
-        print "Unknown variables:", unknown.keys()
+        print("Unknown variables:", list(unknown.keys()))
         Exit(1)
 
     env.Replace(READS = env['READS'].split(','))

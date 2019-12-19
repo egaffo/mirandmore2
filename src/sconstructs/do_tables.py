@@ -4,7 +4,7 @@ Import('*')
 try:
     env = env_do_tables.Clone()
 except NameError as ne:
-    print 'mirandmore_do_tables: command line mode.'
+    print('mirandmore_do_tables: command line mode.')
 
     vars = Variables('vars.py')
     vars.Add('MATURE_TABLE', '', '') 

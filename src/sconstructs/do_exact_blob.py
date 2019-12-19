@@ -3,7 +3,7 @@ Import('*')
 try:
     env = env_exact_blob.Clone()
 except NameError as ne:
-    print 'mirandmore_do_exact_blob: command line mode.'
+    print('mirandmore_do_exact_blob: command line mode.')
 
     vars = Variables('vars.py')
     vars.Add('SAMPLE', '', '')

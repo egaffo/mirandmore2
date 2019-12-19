@@ -14,7 +14,7 @@ Import('*')
 try:
     env = env_serialize_alignments.Clone()
 except NameError as ne:
-    print 'mirandmore_serialize_alignments: command line mode.'
+    print('mirandmore_serialize_alignments: command line mode.')
     vars = Variables('vars.py')
     vars.Add('SAMPLE', '', '')
     vars.Add('MULTIPLE_GENOMIC_HITS_THRESHOLD', '', '')

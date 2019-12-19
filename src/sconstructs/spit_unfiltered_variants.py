@@ -7,7 +7,7 @@ Import('*')
 try:
     env = env_spit_unfiltered_variants.Clone()
 except NameError as ne:
-    print 'mirandmore_spit_unfiltered_variants: command line mode.'
+    print('mirandmore_spit_unfiltered_variants: command line mode.')
     
     vars = Variables('vars.py')
     vars.Add('SAMPLE', '', '')

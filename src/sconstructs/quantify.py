@@ -7,7 +7,7 @@ Import('*')
 try:
     env = env_quantify.Clone()
 except NameError as ne:
-        print 'mirandmore_quantify: command line mode. Not yet implemented', ne
+        print('mirandmore_quantify: command line mode. Not yet implemented', ne)
 	vars = Variables('vars.py')
 	
 	env = Environment(variables = vars,ENV = os.environ)

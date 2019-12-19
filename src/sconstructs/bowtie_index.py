@@ -17,7 +17,7 @@ Returns:
               bwt.log, bwt.err]
 '''
 
-import os
+import os, errno
 
 Import('*')
 
@@ -36,7 +36,7 @@ try:
     env = env_bowtie_index.Clone()
     #fasta_to_index = bowtie_index_FASTA_TO_INDEX
 except NameError as ne:
-    print ne
+    print(ne)
     vars = Variables('vars.py')
     vars.Add('FASTA_TO_INDEX', 'The fasta file to be indexed.', 'fasta')
     

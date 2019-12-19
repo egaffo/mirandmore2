@@ -27,7 +27,7 @@ except NameError:
     Help(vars.GenerateHelpText(env))
     unknown = vars.UnknownVariables()
     if unknown:
-        print "Unknown variables:", unknown.keys()
+        print("Unknown variables:", list(unknown.keys()))
         Exit(1)
 
 env.SetDefault(ADPT_OVERLAP = 5)

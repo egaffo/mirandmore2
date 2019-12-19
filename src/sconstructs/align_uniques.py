@@ -16,7 +16,7 @@ Import('*')
 try:
     env = env_aligned_uniques.Clone()
 except NameError as ne:
-    print 'mirandmore_align_uniques: failed to import', ne
+    print('mirandmore_align_uniques: failed to import', ne)
     vars = Variables('vars.py')
     vars.Add('CPUS', '', '')
     vars.Add('SAMPLE', '''The name of the sample to build the target file name. ''', '')

@@ -19,7 +19,7 @@ Import('*')
 try:
     env = env_align_to_hairpins.Clone()
 except NameError as ne:
-    print 'mirandmore_align_to_hairpins:', ne, 'not set. Command line mode not implemented'
+    print('mirandmore_align_to_hairpins:', ne, 'not set. Command line mode not implemented')
     vars = Variables('vars.py')
     vars.Add('SAMPLE', 'basename', 'mm_excised_precursors')
     vars.Add('CPUS', '', '')

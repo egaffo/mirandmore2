@@ -72,7 +72,7 @@ extended_annotation = {'PRECURSORS_FASTA':extended_precursors[1],
 annotation_files = {annotation_dir:annotation,
                     extended_precursors_dir:extended_annotation}
 
-for vardir, params in annotation_files.iteritems():
+for vardir, params in annotation_files.items():
     
     mirandmore_process_annotation_PRECURSORS_FASTA    = params['PRECURSORS_FASTA']
     mirandmore_process_annotation_CHRM_PREFIX_TO_REMOVE = params['CHRM_PREFIX_TO_REMOVE'] 

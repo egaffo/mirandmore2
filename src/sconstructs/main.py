@@ -403,7 +403,7 @@ for sample in sorted(samples.keys()):
 
     ## Must set explicit dependencies since the code in 'rna.py' library may hide dependencies
     Depends(quantify_sample[0], 
-            [mirandmore_annotation[0][f] for f in mirandmore_annotation[0].keys()] +\
+            [mirandmore_annotation[0][f] for f in list(mirandmore_annotation[0].keys())] +\
             [mirandmore_annotation[1]])
     
     quantify_results[sample] = quantify_sample[1]
@@ -434,7 +434,7 @@ if env['NON_MIRNAS']:
     ## MERGE SAMPLES' NON-MIRNA COUNTS
     sample_file_str = []
     gene_count_files = []
-    for sample in samples.keys():
+    for sample in list(samples.keys()):
         count_file = results[sample]['non_mirna']['GENE_COUNTS']
         if count_file:
             count_file = count_file[0]
@@ -497,13 +497,13 @@ if env['NON_MIRNAS']:
 #Clean('.', read_quality_stats_dir)
 
 
-env['MIR_TABLES'] = [items['TABLES'][0] for items in quantify_results.values()]
+env['MIR_TABLES'] = [items['TABLES'][0] for items in list(quantify_results.values())]
 
 ## COLLECT SAMPLES' MIRNA RESULTS
 env_summarize_tables = env.Clone()
 
 env_summarize_tables['UNFILTERED_VARIANT_TABLES'] = [items['UNFILTERED_VARIANTS'] \
-                                                     for items in quantify_results.values()]
+                                                     for items in list(quantify_results.values())]
 
 summary_tables = SConscript(os.path.join(results_dir, 'summarize_tables.py'),
                             src_dir = SCONSCRIPT_HOME,

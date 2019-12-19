@@ -3,7 +3,7 @@ Import('*')
 try:
     env = env_extract_seq_of_novel_rnas.Clone()
 except NameError as ne:
-    print 'mirandmore_extract_seq_of_novel_rnas: command line mode.'
+    print('mirandmore_extract_seq_of_novel_rnas: command line mode.')
 
     vars = Variables('vars.py')
     vars.Add('SAMPLE', '', '')

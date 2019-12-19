@@ -11,7 +11,7 @@ Import('*')
 
 try:
     env = env_processing_stats.Clone()
-except NameError, ne:    
+except NameError as ne:    
     vars = Variables('vars.py')
 
 results = env['RESULTS']
@@ -21,7 +21,7 @@ samples = results
 read_quality_stats_dir = 'read_quality_stats'
 ## COLLECT TRIMMING STATISTICS
 env_summarize_depth = env.Clone()
-trim_results = [results[s]['trimmed'] for s in samples.keys()]
+trim_results = [results[s]['trimmed'] for s in list(samples.keys())]
 trimming_report_file = '.*_cutadapt\.log'
 if env['TRIMMER'] == 'fastxtoolkit':
     trimming_report_file = ".*_trimming_report\.txt"
@@ -48,9 +48,9 @@ collect_filter_stats = env.Command(os.path.join(read_quality_stats_dir, "filter_
 
 ## COLLECT QUALITY READS STATISTICS RESULTS
 env_read_quality_stats = env.Clone()
-env_read_quality_stats['SAMPLES'] = samples.keys()
+env_read_quality_stats['SAMPLES'] = list(samples.keys())
 
-read_quality_stats_nodes = [results[n]['quality'] for n in results.keys()]
+read_quality_stats_nodes = [results[n]['quality'] for n in list(results.keys())]
 env_read_quality_stats['FASTQC_HTMLS'] = get_matching_nodes(read_quality_stats_nodes, '.*_fastqc\.html')
 
 read_quality_stats = SConscript(os.path.join(read_quality_stats_dir,
@@ -66,7 +66,7 @@ mirna_pre_align_list = []
 mirna_seqtag_discarded_list = []
 mirna_multi_gen_map_filter_list = []
 mirna_pre_ass_iss_list = []
-for sample,qresults in quantify_results.items():
+for sample,qresults in list(quantify_results.items()):
     ## MIRNA PRECURSOR ALIGNMENTS
     mirna_pre_align_list.append(sample + '="' + qresults['HAIRPIN_ALIGNMENTS'][1].abspath + '"')
     ## MIRNA READ FILTER BY NUMBER OF READS PER SEQUENCE TAG 
@@ -87,7 +87,7 @@ non_mirna_align = 'NULL'
 if env['NON_MIRNAS']:
     ## NON-MIRNA ALIGNMENT STATS
     non_mirna_align_list = []
-    for sample in results.keys():
+    for sample in list(results.keys()):
         non_mirna_align_list.append(sample + '="' +\
                                     results[sample]['non_mirna']['ALIGNMENTS'][1].abspath +\
                                     '"')

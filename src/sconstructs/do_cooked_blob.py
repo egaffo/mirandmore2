@@ -7,7 +7,7 @@ try:
     cooked_blob_exact_blob
     cooked_blob_genomic_hits_blob
 except NameError as ne:
-    print 'mirandmore_do_cooked_blob: command line mode.'
+    print('mirandmore_do_cooked_blob: command line mode.')
 
     vars = Variables('vars.py')
     vars.Add('SAMPLE', '', '')
