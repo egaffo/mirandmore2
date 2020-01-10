@@ -7,12 +7,12 @@ Import('*')
 try:
     env = env_quantify.Clone()
 except NameError as ne:
-        print('mirandmore_quantify: command line mode. Not yet implemented', ne)
-	vars = Variables('vars.py')
-	
-	env = Environment(variables = vars,ENV = os.environ)
-
-	Help(vars.GenerateHelpText(env))
+    print('mirandmore_quantify: command line mode. Not yet implemented', ne)
+    vars = Variables('vars.py')
+    
+    env = Environment(variables = vars,ENV = os.environ)
+    
+    Help(vars.GenerateHelpText(env))
 
 #SRC_DIR = os.path.join(env['ENV']['MIRANDMORE_HOME'],'scons','prj')
 SRC_DIR = env['SCONSCRIPT_HOME']
