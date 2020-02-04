@@ -1,12 +1,7 @@
----
-title: MiR&moRe2
-subtitle: A bioinformatics software pipeline to characterize microRNA and microRNA-offset RNAs from RNA-seq data
-output: 
-  html_document: 
-    toc: yes
-    number_sections: no
----
+MiR&moRe2
+=========
 
+A bioinformatics software pipeline to characterize microRNA and microRNA-offset RNAs from RNA-seq data
 
 Installation
 ============
