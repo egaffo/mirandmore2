@@ -8,6 +8,9 @@ except NameError as ne:
     vars.Add('MIR_TABLES', 'comma separated list of miR tables', '')
     vars.Add('UNFILTERED_VARIANT_TABLES', 'comma separated list of unfiltered variants', '')
     vars.Add('META', '', '')
+    vars.Add('MORFILTER', 'Whether to account (permissive) or not (conservative) '\
+                          'isomiR equivalent sequences in moR read counts', 
+                          'conservative')
 
     env = Environment(variables = vars, ENV = os.environ)
  
@@ -26,7 +29,7 @@ mir_table_num = len(env['MIR_TABLES'])
 unfiltered_variants_tables_num = len(env['UNFILTERED_VARIANT_TABLES'])
 
 cmd = "vacuum_cleaner.R -m $META -i \"${SOURCES[0: " + str(mir_table_num) +\
-      "]}\" -d $TARGET.dir -u \"${SOURCES[" + str(mir_table_num) +\
+      "]}\" -f $MORFILTER -d $TARGET.dir -u \"${SOURCES[" + str(mir_table_num) +\
       ":" + str(unfiltered_variants_tables_num + mir_table_num + 1) + "]}\""
 
 collective_tables = env.Command(targets, 

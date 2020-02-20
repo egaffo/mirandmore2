@@ -77,6 +77,9 @@ vars.Add('CUTADAPT_EXTRA_PARAMS', '', '')
 vars.Add('NON_MIRNAS', 
          'Enable characterization of reads not aligned to miRNA precursors', 
          False)
+vars.Add('MORFILTER', 'Whether to account (permissive) or not (conservative) '\
+                      'isomiR equivalent sequences in moR read counts', 
+                      'conservative')
 
 
 env = Environment(ENV = os.environ,
