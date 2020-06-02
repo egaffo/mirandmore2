@@ -144,7 +144,7 @@ env['ENV']['R_INSTALL_STAGED'] = 'false' ## this is a workaround to prevent
                                     ## generating empty files and directory
                                     ## structure of targets
 R_libs_targets = [os.path.join(TOOLS, 'R_libs', 'plyr', 'R', 'plyr'),
-                  os.path.join(TOOLS, 'R_libs', 'getopt', 'R', 'getopt')]
+                  os.path.join(TOOLS, 'R_libs', 'getopt', 'R', 'optparse')]
 R_libs = env.Command(R_libs_targets, [], 'install_R_libs.R')
 
 
