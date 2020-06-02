@@ -169,6 +169,12 @@ MIN_MORNA_LEN: minimun lenght for moRNAs
 EXTENDED_N: Number of positions for extended hairpins at each end
     default: 30
 
+MORFILTER: Whether to account (permissive) or not (conservative) sequences that align also to miRNAs to estimate moRNA expression. Default is to account sequences aligned only to moRNAs to prevent miRNA sequences to increase moRNA read count.   
+    default: conservative
+
+ALLOWED_OVERHANG: The number of bases allowed to overhang the small RNA coordinates, either at 3' and 5'. This parameter controls the isoform length assigned to each small RNA. For instance, if miR-xx-3p starts at base 10 and ends at base 30 on its precursor, reads aligned from base 7 and/or aligned up to base 33 will be accounted, by default, as miR-xx-3p isomiRs. Conversely, reads aligned before base 7 and/or after base 33 will not increase miR-xx-3p read count.  
+    default: 3
+
 NON_MIRNAS: (Experimental) Enable characterization of reads not aligned to miRNA precursors
     default: False
 
