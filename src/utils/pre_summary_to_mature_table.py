@@ -45,10 +45,10 @@ def main():
 
             if name in known_matures_tab[pre]['matures'].keys():
                 sys.stderr.write("WARNING: " + name + \
-                                 " " + " ".join([chrom, start, end]) +\
+                                 " " + " ".join([str(chrom), str(start), str(end)]) +\
                                  " is duplicate of " + pre + \
                                  " " + name + " " + \
-                                 " ".join(known_matures_tab[pre]['matures'][name].values()) + \
+                                 " ".join([str(i) for i in known_matures_tab[pre]['matures'][name].values()]) + \
                                  " and will be ignored\n")
             else:
                 known_matures_tab[pre]['matures'][name] = defaultdict(dict)
@@ -102,7 +102,7 @@ def main():
                                 end = known_end
 
                     items = [chrom, pre, name, strand,
-                             str(start), str(end), pre_length]
+                             str(start), str(end), str(pre_length)]
 
                     f.write("\t".join(items) + "\n")
 
