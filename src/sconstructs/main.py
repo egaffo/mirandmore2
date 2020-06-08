@@ -138,7 +138,7 @@ if env['BOWTIE_GENOME_INDEX'] == '':
     genome_index_dir = os.path.join(mirandmore_dbs_dir, 'bwt_genome_index')
     env_bowtie_index = env.Clone()
     env_bowtie_index['FASTA_TO_INDEX'] = File(env['GENOME'])  
-    genome_bowtie_index = SConscript(os.path.join(genome_index_dir, 'mirandmore_bowtie_index'),
+    genome_bowtie_index = SConscript(os.path.join(genome_index_dir, 'bowtie_index.py'),
                                      variant_dir = genome_index_dir,
                                      src_dir = SCONSCRIPT_HOME,
                                      duplicate = 0,
